@@ -1,0 +1,5 @@
+Newsreader and Public Sans are included under the SIL Open Font License, Version 1.1.
+The font files were taken from the Fontsource distribution of the Google Fonts projects.
+Copyright for Newsreader belongs to its authors. Copyright for Public Sans belongs to its authors.
+See https://openfontlicense.org/ and https://fontsource.org/ for the license text and upstream projects.
+This note is not part of any warrant document.
