@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Mill Valley Police Department — Warrant Builder</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%2315193a' width='16' height='16'/%3E%3C/svg%3E">
+<style>
+@font-face { font-family: "Newsreader"; src: url("vendor/newsreader-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Newsreader"; src: url("vendor/newsreader-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Public Sans"; src: url("vendor/publicsans-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Public Sans"; src: url("vendor/publicsans-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+:root {
+  --bg: #faf9f5;
+  --panel: #ffffff;
+  --ink: #15193a;
+  --navy: #1b2255;
+  --brass: #8f7340;
+  --line: #e4dfd2;
+  --muted: #5c6178;
+  --warn: #7a2e2e;
+  --template: #f3ead2;
+  --officer: #dcead9;
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  --sans: "Public Sans", "Segoe UI", sans-serif;
+}
+body.dark {
+  --bg: #12141c;
+  --panel: #1c1e2a;
+  --ink: #f3efe4;
+  --navy: #d5dcff;
+  --line: #34384a;
+  --muted: #b7b3a8;
+  --template: #3d3624;
+  --officer: #243528;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; max-width: 100%; overflow-x: hidden; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.45; }
+button, input, select, textarea { font-family: inherit; font-size: 16px; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+header.top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: 12px 16px 10px; background: #15193a; color: #faf9f5;
+}
+.mark { width: 48px; height: 58px; flex: 0 0 auto; }
+.brand { flex: 1 1 200px; min-width: 0; }
+.brand h1 { font-family: var(--serif); font-weight: 600; font-size: 22px; line-height: 1.15; margin: 0; }
+.brand p { margin: 2px 0 0; font-size: 13px; letter-spacing: .01em; color: #e6e1d4; }
+.head-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.head-actions button, .texty {
+  background: transparent; color: #faf9f5; border: 1px solid #8f7340; border-radius: 4px; padding: 6px 10px;
+}
+.privacy { margin: 0; padding: 8px 16px; font-size: 13px; color: var(--muted); }
+.rule { height: 3px; background: var(--brass); }
+main { padding: 16px 16px 108px; }
+.type-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.type-tile {
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 104px; height: 100%; text-align: left;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-top: 3px solid #1b2255;
+  padding: 12px; font-family: var(--serif); font-size: 18px; line-height: 1.25;
+}
+.type-tile span { display: block; margin-top: 6px; font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 400; }
+.ai-line {
+  display: inline; margin: 14px 0 0; padding: 0; border: 0; background: none; box-shadow: none;
+  color: var(--ink); text-decoration: none; font-size: 15px; cursor: pointer;
+}
+.ai-explain { max-width: 68ch; color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--line); padding: 12px; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding: 0; list-style: none; }
+.chips button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 99px; padding: 4px 10px; }
+.chips button.on { background: #1b2255; color: #faf9f5; border-color: #1b2255; }
+body.dark .chips button.on { background: #d5dcff; color: #15193a; }
+.field { margin: 0 0 12px; min-width: 0; }
+.field label, .check { display: block; margin-bottom: 4px; }
+input[type="text"], input[type="date"], input[type="time"], select, textarea {
+  width: 100%; max-width: 100%; background: var(--bg); color: var(--ink);
+  border: 1px solid var(--line); padding: 8px; border-radius: 2px;
+}
+textarea { min-height: 120px; resize: vertical; }
+.check { display: flex; gap: 8px; align-items: flex-start; }
+.check input { margin-top: 3px; }
+details.how { margin: 0 0 12px; }
+details.how summary { cursor: pointer; color: var(--navy); }
+details.how p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.warn { border-left: 3px solid var(--brass); padding: 8px 10px; margin: 0 0 12px; background: var(--bg); }
+.warn strong { font-family: var(--serif); }
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.row-actions button, .export-bar button, .primary {
+  background: #1b2255; color: #faf9f5; border: 0; border-radius: 2px; padding: 8px 12px;
+}
+.ghost { background: transparent !important; color: var(--ink) !important; border: 1px solid var(--line) !important; }
+.doc-chrome { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.model-flag { margin: 0; font-size: 13px; color: var(--warn); flex: 1 1 180px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.tabs button { border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 4px 8px; }
+.tabs button.on { border-color: var(--brass); box-shadow: inset 0 -2px 0 var(--brass); }
+.paper {
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  padding: 22px 18px; font-family: var(--serif); font-size: 17px; line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.paper h2 { font-size: 18px; text-align: center; font-weight: 600; margin: 14px 0 8px; }
+.paper p { margin: 0 0 10px; }
+.paper .center { text-align: center; }
+.paper .court { text-align: center; letter-spacing: .04em; font-weight: 600; margin: 0; }
+.paper .hair { border: 0; border-top: 1px solid var(--brass); margin: 8px 0 12px; }
+.paper img.exhibit { display: block; max-width: 100%; height: auto; margin: 8px auto; }
+.legend { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+body.sources-on .run.template { background: var(--template); }
+body.sources-on .run.officer { background: var(--officer); }
+body.sources-on .run.blank { border-bottom: 1px solid var(--brass); }
+.check-group { margin: 14px 0 6px; font-family: var(--serif); font-size: 18px; }
+.check-item { list-style: none; margin: 0 0 10px; padding: 8px; border: 1px solid transparent; }
+.check-item.outlined { outline: 2px solid var(--brass); outline-offset: 2px; }
+.checks { margin: 0; padding: 0; }
+.due, .detail { margin: 4px 0 0 26px; color: var(--muted); font-size: 14px; }
+.mini { width: auto; max-width: 100%; margin: 6px 0 0 26px; }
+.miss li { margin-bottom: 4px; }
+.bottom-strip {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  background: #15193a; color: #faf9f5; padding: 10px 14px;
+}
+#stripText { flex: 1 1 200px; margin: 0; min-width: 0; }
+.bottom-strip button { background: transparent; color: #faf9f5; border: 1px solid #8f7340; padding: 6px 10px; }
+#overlay[hidden] { display: none; }
+#overlay { position: fixed; inset: 0; background: rgba(21,25,58,.5); z-index: 20; overflow: auto; padding: 16px; }
+.sheet { background: var(--panel); color: var(--ink); max-width: 740px; margin: 12px auto 40px; padding: 16px; }
+.sheet h2, .sheet h3 { font-family: var(--serif); }
+.sheet table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sheet td, .sheet th { border-bottom: 1px solid var(--line); text-align: left; padding: 4px; vertical-align: top; }
+.doc-switch { display: none; }
+@media (max-width: 860px) {
+  .type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .doc-switch { display: inline-block; }
+  body:not(.show-doc) .pane-doc { display: none; }
+  body.show-doc .pane-form { display: none; }
+}
+@media (max-width: 420px) {
+  .type-grid { grid-template-columns: minmax(0, 1fr); }
+  .type-tile { min-height: 104px; }
+}
+@media print {
+  .top, .privacy, .rule, .pane-form, .doc-chrome, .bottom-strip, #overlay { display: none !important; }
+  main { padding: 0; }
+  .pane-doc { display: block !important; }
+  .paper { border: 0; color: black; background: white; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <svg class="mark" viewBox="0 0 80 96" role="img" aria-label="Stand-in for the Mill Valley Police Department patch. The patch file was not attached.">
+    <path d="M40 3 L74 16 V46 C74 68 58 84 40 93 C22 84 6 68 6 46 V16 Z" fill="#1b2255" stroke="#8f7340" stroke-width="3"/>
+    <path d="M40 12 L66 22 V46 C66 63 54 76 40 84 C26 76 14 63 14 46 V22 Z" fill="none" stroke="#8f7340" stroke-width="1.5"/>
+    <text x="40" y="48" text-anchor="middle" fill="#faf9f5" font-size="14" font-family="Georgia, serif">MVPD</text>
+    <text x="40" y="62" text-anchor="middle" fill="#cbb98a" font-size="6.5" font-family="Georgia, serif">MILL VALLEY</text>
+  </svg>
+  <div class="brand">
+    <h1>Mill Valley Police Department</h1>
+    <p>Warrant Builder</p>
+  </div>
+  <div class="head-actions">
+    <button type="button" id="btnLookup">Look up</button>
+    <button type="button" id="btnLearn">Learn</button>
+    <button type="button" id="btnTheme">Dark theme</button>
+    <button type="button" class="doc-switch" id="btnPane">Show document</button>
+  </div>
+</header>
+<p class="privacy">Not a CJIS system. Whether an officer may type a live case into this page is a department decision. The page is private until you share it. It keeps no case facts.</p>
+<div class="rule"></div>
+<main id="app"></main>
+<div class="bottom-strip">
+  <p id="stripText">Pick a warrant type.</p>
+  <button type="button" id="btnCopy">Copy mag room address</button>
+</div>
+<div id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+    <button type="button" id="overlayClose">Close</button>
+    <div id="overlayBody"></div>
+  </div>
+</div>
+<script src="vendor/jszip.min.js"></script>
+<script>
+"use strict";
+/* Warrant Builder mvpd-wb-1. Fixed clauses plus the officer's own words.
+   No model calls, no fetch, no Math.random, no Date.now.
+   JSZip 3.10.1 is vendored from cdnjs so export does not call the network:
+   https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
+   Marin motion docx was not attached. PING_TEMPLATE_B64 stays empty. */
+const TEMPLATE_VERSION = "mvpd-wb-1";
+const MAG_ROOM = "da_magroom@marincounty.gov";
+let pingTemplateB64 = "";
+const HOLIDAYS = {
+  "2026-01-01": "New Year's Day",
+  "2026-01-19": "Dr. Martin Luther King, Jr. Day",
+  "2026-02-12": "Lincoln's Birthday",
+  "2026-02-16": "Presidents Day",
+  "2026-03-31": "Farmworkers Day",
+  "2026-05-25": "Memorial Day",
+  "2026-06-19": "Juneteenth",
+  "2026-07-03": "Independence Day (observed)",
+  "2026-09-07": "Labor Day",
+  "2026-09-25": "Native American Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "Martin Luther King, Jr. Day",
+  "2027-02-12": "Lincoln's Birthday",
+  "2027-02-15": "Washington's Birthday",
+  "2027-04-09": "Farmworkers Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-18": "Juneteenth (observed)",
+  "2027-07-05": "Independence Day (observed)",
+  "2027-09-06": "Labor Day",
+  "2027-09-24": "Native American Day",
+  "2027-11-11": "Veterans Day",
+  "2027-11-25": "Thanksgiving",
+  "2027-11-26": "Day after Thanksgiving",
+  "2027-12-24": "Christmas Day (observed)"
+};
+const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const CRIMES = ["Property","DVSA","DUI","Persons","Narcotics","Fraud","Missing person","Other"];
+const DELAY_REASONS = [
+  "Danger to the life or physical safety of an individual",
+  "Flight from prosecution",
+  "Destruction of or tampering with evidence",
+  "Intimidation of potential witnesses",
+  "Serious jeopardy to an investigation or undue delay of a trial"
+];
+const PROFILE_KEYS = ["officerName","badge","years","assignment","training"];
+const GAP_LABELS = {
+  nondisclosure: "CalECPA non-disclosure",
+  delay: "delayed notice and extension",
+  custodian: "custodian declaration",
+  fiveday: "5-day production",
+  unrelated: "sealing of unrelated data",
+  sealorder: "sealing order",
+  hobbs: "Hobbs attachment",
+  notices: "notices"
+};
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+function parseISO(iso) {
+  const p = String(iso || "").split("-");
+  if (p.length !== 3) return null;
+  const y = Number(p[0]), m = Number(p[1]), d = Number(p[2]);
+  if (!y || !m || !d) return null;
+  return new Date(Date.UTC(y, m - 1, d));
+}
+function fmt(dt) {
+  const y = dt.getUTCFullYear();
+  const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(dt.getUTCDate()).padStart(2, "0");
+  return y + "-" + m + "-" + d;
+}
+function addCal(iso, n) {
+  const dt = parseISO(iso);
+  if (!dt) return "";
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return fmt(dt);
+}
+function isWeekend(iso) {
+  const dt = parseISO(iso);
+  if (!dt) return false;
+  const day = dt.getUTCDay();
+  return day === 0 || day === 6;
+}
+function isHoliday(iso) { return !!HOLIDAYS[iso]; }
+function isCourtDay(iso) { return !!parseISO(iso) && !isWeekend(iso) && !isHoliday(iso); }
+function longDate(iso) {
+  const dt = parseISO(iso);
+  if (!dt) return "";
+  return WEEKDAYS[dt.getUTCDay()] + ", " + MONTHS[dt.getUTCMonth()] + " " + dt.getUTCDate() + ", " + dt.getUTCFullYear();
+}
+function outsideTable(iso) {
+  return !!iso && (iso < "2026-01-01" || iso > "2027-12-31");
+}
+function courtDaysAfter(iso, n) {
+  if (!parseISO(iso)) return "";
+  let cur = iso;
+  let left = n;
+  let guard = 0;
+  while (left > 0 && guard < 400) {
+    cur = addCal(cur, 1);
+    if (isCourtDay(cur)) left -= 1;
+    guard += 1;
+  }
+  return cur;
+}
+function businessDaysAfter(iso, n) {
+  return courtDaysAfter(iso, n);
+}
+function executionDay(issueIso) { return addCal(issueIso, 10); }
+function lastCourtOnOrBefore(iso) {
+  let cur = iso;
+  let guard = 0;
+  while (cur && (!isCourtDay(cur)) && guard < 20) {
+    cur = addCal(cur, -1);
+    guard += 1;
+  }
+  return cur;
+}
+function returnBy(issueIso) {
+  const day10 = executionDay(issueIso);
+  if (!day10) return "";
+  if (isWeekend(day10) || isHoliday(day10)) return lastCourtOnOrBefore(addCal(day10, -1));
+  return day10;
+}
+function earlierDate(a, b) {
+  if (!a) return b || "";
+  if (!b) return a;
+  return a < b ? a : b;
+}
+function showDate(iso) {
+  if (!iso) return "Enter the date this count starts from.";
+  let text = longDate(iso);
+  if (outsideTable(iso)) text += " — past the holiday table (verified through December 31, 2027). Check the court calendar.";
+  return text;
+}
+
+const state = {
+  type: null,
+  step: 0,
+  answers: {},
+  post: {},
+  checks: {},
+  exhibits: [],
+  docTab: null,
+  sources: false,
+  showDoc: false
+};
+const stash = {};
+
+function val(key) { return String(state.answers[key] == null ? "" : state.answers[key]).trim(); }
+function post(key) { return String(state.post[key] == null ? "" : state.post[key]).trim(); }
+function on(key) { return state.answers[key] === "yes"; }
+
+function stepsFor(type) {
+  if (type === "ping") {
+    return [
+      { id: "you", label: "You" },
+      { id: "emergency", label: "Emergency?" },
+      { id: "request", label: "Request" },
+      { id: "results", label: "Results" },
+      { id: "facts", label: "Facts" },
+      { id: "conditions", label: "Special conditions" },
+      { id: "review", label: "Review" },
+      { id: "after", label: "After filing" }
+    ];
+  }
+  return [
+    { id: "you", label: "You" },
+    { id: "target", label: "Target" },
+    { id: "seeking", label: "Looking for" },
+    { id: "facts", label: "Facts" },
+    { id: "conditions", label: "Special conditions" },
+    { id: "review", label: "Review" },
+    { id: "after", label: "After signing" }
+  ];
+}
+function nightFormOnly() {
+  return state.type === "blood" && on("nightForm") && !on("major");
+}
+function stopped911() {
+  return state.type === "ping" && state.answers.same911 === "yes";
+}
+function buildingPacket() {
+  return !!state.type && !stopped911() && !nightFormOnly();
+}
+function phonesInPlace() { return state.type === "place" && on("phones"); }
+function bloodPhone() { return state.type === "blood" && on("bloodPhone"); }
+function electronicMatter() {
+  return state.type === "records" || state.type === "device" || state.type === "tracker" || phonesInPlace() || bloodPhone();
+}
+function needsNotice() {
+  if (stopped911() || nightFormOnly() || state.type === "ramey") return false;
+  if (state.type === "ping" || state.type === "pen" || state.type === "records" || state.type === "device" || state.type === "tracker") return true;
+  if (phonesInPlace() || bloodPhone() || on("delay")) return true;
+  return false;
+}
+function geofenceHit() {
+  const blob = [val("items"), val("facts"), val("recOther"), val("phoneData"), val("seekingNote")].join(" ").toLowerCase();
+  return /geofence|location history/.test(blob);
+}
+
+function crimeOptions() {
+  return [{ value: "", label: "Select" }].concat(CRIMES.map(function (c) { return { value: c, label: c }; }));
+}
+function fieldShow(f) { return !f.show || f.show(); }
+function fieldReq(f) {
+  if (!fieldShow(f)) return false;
+  if (typeof f.required === "function") return !!f.required();
+  return !!f.required;
+}
+function fieldsFor(stepId) {
+  const t = state.type;
+  if (stepId === "you") {
+    const hideDa = t === "ping" || nightFormOnly();
+    return [
+      { key: "officerName", label: "Your name", type: "text", required: true },
+      { key: "badge", label: "Badge", type: "text", required: true },
+      { key: "years", label: "Years on the job", type: "text" },
+      { key: "assignment", label: "Assignment", type: "text" },
+      { key: "training", label: "Warrant training", type: "text" },
+      { key: "caseNumber", label: "Case number", type: "text", required: true },
+      { key: "crimeType", label: "Crime type", type: "select", options: crimeOptions(), required: t !== "ping", show: function () { return t !== "ping"; } },
+      { key: "daName", label: "Deputy DA name", type: "text", show: function () { return !hideDa; } },
+      { key: "daEmail", label: "Deputy DA email", type: "text", show: function () { return !hideDa; } },
+      { key: "issueDate", label: "Date the judge will sign", type: "date", required: function () { return t !== "ping" && !nightFormOnly(); }, show: function () { return t !== "ping"; } }
+    ];
+  }
+  if (stepId === "emergency") {
+    return [
+      { key: "danger", label: "Danger of death or serious physical injury", type: "textarea", required: function () { return state.answers.same911 !== "yes"; } },
+      { key: "whyNoWarrant", label: "Why a warrant could not be obtained in time", type: "textarea", required: function () { return state.answers.same911 !== "yes"; } },
+      { key: "same911", label: "Was this a 911 call from this same phone?", type: "radio", rerender: true, required: true, options: [
+        { value: "no", label: "No" },
+        { value: "yes", label: "Yes — from this same phone" }
+      ] }
+    ];
+  }
+  if (stepId === "request") {
+    if (stopped911()) return [];
+    return [
+      { key: "phone", label: "Phone number", type: "text", required: true },
+      { key: "carrier", label: "Carrier", type: "text", required: true },
+      { key: "approveSgt", label: "Sergeant who approved the ping", type: "text", required: true },
+      { key: "requestDate", label: "Date of the request", type: "date", required: true },
+      { key: "requestTime", label: "Time of the request", type: "time", required: true },
+      { key: "requestWhat", label: "What you asked the carrier for", type: "text", required: true }
+    ];
+  }
+  if (stepId === "results") {
+    if (stopped911()) return [];
+    return [
+      { key: "firstDate", label: "Date the first result was obtained", type: "date", required: true },
+      { key: "firstTime", label: "Time the first result was obtained", type: "time", required: true },
+      { key: "firstResult", label: "What the first result said", type: "textarea", required: true },
+      { key: "laterResults", label: "Later results, if any", type: "textarea" }
+    ];
+  }
+  if (stepId === "target") return targetFields();
+  if (stepId === "seeking") return seekingFields();
+  if (stepId === "facts") {
+    if (!buildingPacket()) return [];
+    return [{ key: "facts", label: "Facts, in your own words", type: "textarea", required: true }];
+  }
+  if (stepId === "conditions") return conditionFields();
+  return [];
+}
+function targetFields() {
+  const t = state.type;
+  if (t === "place") {
+    return [
+      { key: "placeKind", label: "What is to be searched?", type: "radio", rerender: true, required: true, options: [
+        { value: "home", label: "Home" },
+        { value: "building", label: "Building" },
+        { value: "car", label: "Car" },
+        { value: "person", label: "Person" }
+      ] },
+      { key: "address", label: "Address or description of the place", type: "textarea", required: true, show: function () { return val("placeKind") === "home" || val("placeKind") === "building"; } },
+      { key: "plate", label: "Plate", type: "text", show: function () { return val("placeKind") === "car"; } },
+      { key: "vehicle", label: "Vehicle description", type: "textarea", required: true, show: function () { return val("placeKind") === "car"; } },
+      { key: "personName", label: "Person's name", type: "text", required: true, show: function () { return val("placeKind") === "person"; } },
+      { key: "personDesc", label: "Description, and where the person will be searched", type: "textarea", required: true, show: function () { return val("placeKind") === "person"; } }
+    ];
+  }
+  if (t === "blood") {
+    return [
+      { key: "driverName", label: "Driver's name", type: "text", required: true },
+      { key: "driverDob", label: "Driver's date of birth", type: "text" },
+      { key: "driverWhere", label: "Where the driver is", type: "select", required: true, options: [
+        { value: "", label: "Select" },
+        { value: "station", label: "Station" },
+        { value: "jail", label: "Jail booking" },
+        { value: "hospital", label: "Hospital" }
+      ] },
+      { key: "nightForm", label: "Is this the night DUI blood draw on the department pre-approved form?", type: "radio", rerender: true, required: true, options: [
+        { value: "no", label: "No — write a warrant" },
+        { value: "yes", label: "Yes — department form, sergeant only" }
+      ] }
+    ];
+  }
+  if (t === "records") {
+    return [
+      { key: "company", label: "Company", type: "text", required: true },
+      { key: "accountId", label: "Account identifiers (one company only)", type: "textarea", required: true },
+      { key: "outOfState", label: "Is the company a foreign corporation qualified in California?", type: "radio", options: [
+        { value: "yes", label: "Yes, or I believe so" },
+        { value: "no", label: "No" },
+        { value: "unknown", label: "I do not know yet" }
+      ] }
+    ];
+  }
+  if (t === "device") {
+    return [
+      { key: "deviceDesc", label: "Device (make, color, identifiers)", type: "textarea", required: true },
+      { key: "deviceWhere", label: "Where the department is holding it", type: "text", required: true },
+      { key: "deviceHow", label: "How the department has it", type: "text", required: true }
+    ];
+  }
+  if (t === "tracker") {
+    return [
+      { key: "trackWhat", label: "Person or property to be tracked", type: "textarea", required: true },
+      { key: "trackWhere", label: "Where it will be installed, or which company holds the data", type: "textarea", required: true }
+    ];
+  }
+  if (t === "pen") {
+    return [
+      { key: "phone", label: "Telephone number", type: "text", required: true },
+      { key: "subscriber", label: "Subscriber, if known", type: "text" },
+      { key: "carrier", label: "Carrier", type: "text", required: true },
+      { key: "penTarget", label: "Person under investigation, if known", type: "text" }
+    ];
+  }
+  if (t === "ramey") {
+    return [
+      { key: "personName", label: "Person to arrest", type: "text", required: true },
+      { key: "personDesc", label: "Description", type: "textarea", required: true },
+      { key: "offense", label: "Crime", type: "text", required: true },
+      { key: "bail", label: "Bail amount, if any", type: "text" }
+    ];
+  }
+  return [];
+}
+function seekingFields() {
+  const t = state.type;
+  if (!buildingPacket() && t !== "blood") return [];
+  if (t === "blood" && nightFormOnly()) return [];
+  if (t === "place") {
+    return [
+      { key: "offense", label: "Offense", type: "text", required: true },
+      { key: "ground", label: "Statutory ground", type: "select", required: true, rerender: true, options: [
+        { value: "", label: "Select" },
+        { value: "a1", label: "Stolen or embezzled — 1524(a)(1)" },
+        { value: "a2", label: "Means of a felony — 1524(a)(2)" },
+        { value: "a3", label: "Intended for a public offense — 1524(a)(3)" },
+        { value: "a4", label: "Evidence of a felony — 1524(a)(4)" },
+        { value: "a9", label: "Firearm at a domestic violence scene — 1524(a)(9)" },
+        { value: "other", label: "Other — I will name the statute" }
+      ] },
+      { key: "groundOther", label: "Name the statute", type: "text", required: true, show: function () { return val("ground") === "other"; } },
+      { key: "items", label: "Items to seize", type: "textarea", required: true },
+      { key: "phones", label: "Phones or other electronic devices are included", type: "check", rerender: true },
+      { key: "phoneDesc", label: "Phones or devices, described", type: "textarea", required: true, show: function () { return on("phones"); } },
+      { key: "phoneWindow", label: "Time period for the electronic information", type: "text", required: true, show: function () { return on("phones"); } },
+      { key: "phoneData", label: "Types of information sought", type: "textarea", required: true, show: function () { return on("phones"); } }
+    ];
+  }
+  if (t === "blood") {
+    return [
+      { key: "bloodStatus", label: "Blood test under Vehicle Code 23612", type: "radio", required: true, rerender: true, options: [
+        { value: "refused", label: "The driver refused" },
+        { value: "incomplete", label: "The driver did not finish the test" },
+        { value: "other", label: "Neither of those" }
+      ] },
+      { key: "offense", label: "Vehicle Code section you are using", type: "text", required: true }
+    ];
+  }
+  if (t === "records") {
+    return [
+      { key: "offense", label: "Offense", type: "text", required: true },
+      { key: "recWindow", label: "Time period", type: "text", required: true },
+      { key: "recSubscriber", label: "Subscriber information", type: "check" },
+      { key: "recLogs", label: "Logs (times, IP addresses, routing)", type: "check" },
+      { key: "recContent", label: "Content (messages, photos, files)", type: "check" },
+      { key: "recOther", label: "Anything else, described with particularity", type: "textarea" },
+      { key: "preserveDate", label: "Date of the preservation request, if you send one", type: "date" }
+    ];
+  }
+  if (t === "device") {
+    return [
+      { key: "offense", label: "Offense", type: "text", required: true },
+      { key: "phoneWindow", label: "Time period", type: "text", required: true },
+      { key: "phoneData", label: "Types of information, and the apps or services", type: "textarea", required: true }
+    ];
+  }
+  if (t === "tracker") {
+    return [
+      { key: "offense", label: "Offense", type: "text", required: true },
+      { key: "trackDays", label: "Days of tracking the judge is asked to allow (30 is the maximum from issuance)", type: "text" }
+    ];
+  }
+  if (t === "pen") {
+    return [
+      { key: "offense", label: "Offense the numbers relate to", type: "text", required: true },
+      { key: "penKind", label: "Order type", type: "radio", required: true, options: [
+        { value: "both", label: "Pen register and trap and trace" },
+        { value: "pen", label: "Pen register only" },
+        { value: "trap", label: "Trap and trace only" }
+      ] }
+    ];
+  }
+  if (t === "ramey") {
+    return [
+      { key: "facts", label: "Probable cause, in your own words", type: "textarea", required: true }
+    ];
+  }
+  return [];
+}
+function conditionFields() {
+  const t = state.type;
+  if (t === "ramey" || stopped911()) return [];
+  const list = [];
+  if (t === "blood") {
+    list.push({ key: "major", label: "Major collision DUI", type: "check", rerender: true });
+  }
+  if (nightFormOnly()) return list;
+  if (t === "place" || t === "blood") {
+    list.push({ key: "night", label: "Night service, outside 7 a.m. to 10 p.m.", type: "check", rerender: true });
+  }
+  if (t === "tracker") {
+    list.push({ key: "night", label: "Night installation, outside 6 a.m. to 10 p.m.", type: "check", rerender: true });
+  }
+  if (on("night")) list.push({ key: "nightCause", label: "Good cause for night service or night installation", type: "textarea", required: true });
+  if (on("major")) {
+    list.push({ key: "collisionKind", label: "Injury", type: "radio", required: true, rerender: true, options: [
+      { value: "fatal", label: "Fatal" },
+      { value: "serious", label: "Serious bodily injury" },
+      { value: "other", label: "Other injury" }
+    ] });
+    list.push({ key: "atHospital", label: "Driver is at a hospital", type: "check" });
+    list.push({ key: "hospitalSample", label: "Hospital's own blood sample", type: "check" });
+    list.push({ key: "vehicleItems", label: "Vehicle items", type: "textarea" });
+    list.push({ key: "edr", label: "Event data recorder", type: "check" });
+    list.push({ key: "bloodPhone", label: "Phone", type: "check", rerender: true });
+  }
+  if (t === "records" || t === "tracker") {
+    list.push({ key: "portal", label: "Electronic / portal service", type: "check" });
+    list.push({ key: "fiveDay", label: "5-business-day production (Penal Code 1524.2)", type: "check" });
+  }
+  const delayOk = t === "ping" || t === "place" || t === "records" || t === "device" || t === "tracker" || t === "pen" || bloodPhone();
+  if (delayOk) list.push({ key: "delay", label: "90-day delayed notice and non-disclosure", type: "check", rerender: true });
+  if (on("delay")) {
+    list.push({ key: "delayReason", label: "Adverse result the delay is based on", type: "select", required: true, options: [{ value: "", label: "Select" }].concat(DELAY_REASONS.map(function (r) { return { value: r, label: r }; })) });
+  }
+  if (t === "place" || t === "records" || t === "device" || t === "tracker" || t === "blood") {
+    list.push({ key: "seal", label: "Sealing order", type: "check" });
+    list.push({ key: "hobbs", label: "Hobbs confidential attachment", type: "check", rerender: true });
+  }
+  if (on("hobbs")) list.push({ key: "hobbsFacts", label: "Confidential facts (this goes only in sealed Attachment A)", type: "textarea", required: true });
+  if (t === "device" || t === "place" || bloodPhone()) {
+    list.push({ key: "unlock", label: "Fingerprint or face unlock", type: "check", rerender: true });
+  }
+  if (on("unlock")) list.push({ key: "unlockPerson", label: "Person whose finger or face may be used", type: "text", required: true });
+  return list;
+}
+function missingOnStep(stepId) {
+  const out = [];
+  if (stepId === "seeking" && state.type === "records" && buildingPacket()) {
+    if (!on("recSubscriber") && !on("recLogs") && !on("recContent") && !val("recOther")) out.push("Which records");
+  }
+  fieldsFor(stepId).forEach(function (f) {
+    if (!fieldReq(f)) return;
+    if (!val(f.key)) out.push(f.label);
+  });
+  return out;
+}
+function allMissing() {
+  const steps = stepsFor(state.type).filter(function (s) { return s.id !== "review" && s.id !== "after"; });
+  const out = [];
+  steps.forEach(function (s) {
+    missingOnStep(s.id).forEach(function (label) { out.push(label); });
+  });
+  return out;
+}
+
+function O(key) {
+  const v = val(key);
+  if (!v) return { id: key, text: "________", origin: "blank" };
+  return { id: key, text: v, origin: "officer" };
+}
+function OD(key) {
+  const v = val(key);
+  if (!parseISO(v)) return { id: key, text: "________", origin: "blank" };
+  return { id: key, text: longDate(v), origin: "officer" };
+}
+function OT(key) {
+  const v = val(key);
+  if (!v) return [{ id: key, text: "________", origin: "blank" }];
+  const shown = /^\d{2}:\d{2}$/.test(v) ? v.replace(":", "") : v;
+  return [{ id: key, text: shown, origin: "officer" }, T(key + "-h", " hours")];
+}
+function OP(key) {
+  const v = post(key);
+  if (!v) return { id: "post-" + key, text: "________", origin: "blank" };
+  return { id: "post-" + key, text: v, origin: "officer" };
+}
+function OPD(key) {
+  const v = post(key);
+  if (!parseISO(v)) return { id: "post-" + key, text: "________", origin: "blank" };
+  return { id: "post-" + key, text: longDate(v), origin: "officer" };
+}
+function T(id, text, gap) { return { id: id, text: text, origin: "template", gap: gap || null }; }
+function P(runs) { return { kind: "p", runs: runs }; }
+function C(runs) { return { kind: "center", runs: runs }; }
+function HD(text, id) { return { kind: "h", runs: [T(id, text)] }; }
+function factParas(text, id) {
+  const lines = String(text || "").split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+  if (!lines.length) return [P([{ id: id, text: "________", origin: "blank" }])];
+  return lines.map(function (line, i) { return P([{ id: id + "-" + i, text: line, origin: "officer" }]); });
+}
+function courtHead(title, prefix) {
+  return [
+    C([T(prefix + "-court", "SUPERIOR COURT OF CALIFORNIA")]),
+    C([T(prefix + "-county", "COUNTY OF MARIN")]),
+    { kind: "rule" },
+    C([T(prefix + "-title", title)])
+  ];
+}
+function officerSign(prefix) {
+  return [
+    P([T(prefix + "-perj", "I declare under penalty of perjury under the laws of the State of California that the foregoing is true and correct.")]),
+    P([T(prefix + "-dateL", "Date: "), OD("issueDate")]),
+    P([T(prefix + "-sig", "Signature: ________________________________")]),
+    P([T(prefix + "-pr", "Print: "), O("officerName"), T(prefix + "-bd", ", badge "), O("badge"), T(prefix + "-ag", ", Mill Valley Police Department.")])
+  ];
+}
+function judgeSign(prefix) {
+  return [
+    P([T(prefix + "-jdate", "Date and time of issuance: ________________________________")]),
+    P([T(prefix + "-jsig", "________________________________")]),
+    P([T(prefix + "-jcap", "Judge of the Superior Court, County of Marin")])
+  ];
+}
+function exhibitBlocks() {
+  const blocks = [];
+  state.exhibits.forEach(function (ex, i) {
+    const letter = String.fromCharCode(65 + i);
+    blocks.push(HD("Exhibit " + letter, "EX-H-" + letter));
+    blocks.push({ kind: "img", src: ex.dataUrl, id: "EX-IMG-" + letter });
+    blocks.push(P([T("EX-L-" + letter, "Exhibit " + letter + ". "), { id: "EX-CAP-" + letter, text: ex.caption ? ex.caption : "________", origin: ex.caption ? "officer" : "blank" }]));
+  });
+  return blocks;
+}
+function groundRuns() {
+  const g = val("ground");
+  const map = {
+    a1: "Penal Code 1524(a)(1), stolen or embezzled property",
+    a2: "Penal Code 1524(a)(2), property used as the means of committing a felony",
+    a3: "Penal Code 1524(a)(3), property intended for use in a public offense",
+    a4: "Penal Code 1524(a)(4), evidence that a felony has been committed",
+    a9: "Penal Code 1524(a)(9), a firearm or other deadly weapon at a domestic violence scene"
+  };
+  if (map[g]) return [T("G-1", map[g])];
+  if (g === "other") return [T("G-2", "the ground stated here: "), O("groundOther")];
+  return [T("G-0", "________")];
+}
+function placeRuns() {
+  const k = val("placeKind");
+  if (k === "home" || k === "building") return [T("PL-1", "The " + (k === "home" ? "home" : "building") + " to be searched is: "), O("address")];
+  if (k === "car") return [T("PL-2", "The vehicle to be searched is: "), O("vehicle"), T("PL-3", ". Plate: "), O("plate"), T("PL-4", ".")];
+  if (k === "person") return [T("PL-5", "The person to be searched is "), O("personName"), T("PL-6", ". "), O("personDesc")];
+  return [T("PL-0", "The place or person to be searched is: "), { id: "place-blank", text: "________", origin: "blank" }];
+}
+function initialLine(id, label) {
+  return P([T(id, label + " — judge's initials: ________. Not initialed means not granted.")]);
+}
+function calecpaBlocks(prefix) {
+  const blocks = [];
+  blocks.push(P([T(prefix + "-d1", "The electronic information to be seized is limited to the time period, the targets, the applications or services, and the types of information stated in this affidavit. Penal Code 1546.1(d)(1).")]));
+  blocks.push(P([T(prefix + "-d2", "Any information obtained that is unrelated to the objective of this warrant shall be sealed and shall not be subject to further review, use, or disclosure except pursuant to a court order or to comply with discovery as required by Penal Code 1054.1 and 1054.7. Penal Code 1546.1(d)(2).", "unrelated")]));
+  if (state.type === "records" || on("portal")) {
+    blocks.push(P([T(prefix + "-d3", "If this warrant is directed to a service provider, the provider shall verify the authenticity of the electronic information it produces by an affidavit that complies with Evidence Code 1561. Penal Code 1546.1(d)(3).", "custodian")]));
+  }
+  if (on("fiveDay")) {
+    blocks.push(P([T(prefix + "-5d", "If the company is a foreign corporation qualified to do business in California and it provides electronic communication services or remote computing services to the public, it shall produce the records within five business days of receipt, including records kept outside California. Penal Code 1524.2(b)(1). The statute does not define business day. A company that is merely located out of state is not, by that fact alone, covered.", "fiveday")]));
+  }
+  if (on("portal")) {
+    blocks.push(P([T(prefix + "-po", "Service may be made by email or by the internet portal the recipient has designated for service. Penal Code 1524.2(a)(6).")]));
+  }
+  if (on("delay")) {
+    blocks.push(P([T(prefix + "-nd", "The People ask the court to delay notice to the target, and to order that any party providing information not notify any other party that information has been sought, for 90 days. The adverse result relied on is: ", "nondisclosure"), O("delayReason"), T(prefix + "-nd2", ". Penal Code 1546.2(b).", "delay")]));
+  }
+  if (on("seal")) {
+    blocks.push(P([T(prefix + "-so", "The People ask the court to seal this warrant and the affidavit until further order of the court.", "sealorder")]));
+  }
+  if (on("unlock")) {
+    blocks.push(P([T(prefix + "-ul", "The People ask the court to authorize use of the finger or the face of the following person, and no other part of that person, to open the device: "), O("unlockPerson"), T(prefix + "-ul2", ". This sentence is model wording. No statute was verified that specifically grants compelled face or finger unlock.")]));
+  }
+  return blocks;
+}
+function nightBlocks(prefix) {
+  if (!on("night")) return [];
+  if (state.type === "tracker") {
+    return [P([T(prefix + "-ni", "Installation in the daytime means between 6 a.m. and 10 p.m. Penal Code 1534(b)(7). Good cause to install at another time: "), O("nightCause")])];
+  }
+  return [P([T(prefix + "-ns", "Good cause is asked for a direction that this warrant may be served at any time of the day or night. Without that direction, service is only between 7 a.m. and 10 p.m. Penal Code 1533. Good cause: "), O("nightCause")])];
+}
+function majorBlocks(prefix) {
+  if (!on("major")) return [];
+  const kind = val("collisionKind");
+  const kindText = kind === "fatal" ? "a fatal collision" : kind === "serious" ? "a collision with serious bodily injury" : kind === "other" ? "a collision with an injury that is not described here as serious bodily injury" : "a major collision";
+  const blocks = [P([T(prefix + "-mj", "This investigation concerns " + kindText + ". The communications center calls the deputy district attorney out to the scene.")])];
+  if (on("atHospital")) blocks.push(P([T(prefix + "-hos", "The driver is at a hospital.")]));
+  if (on("hospitalSample")) blocks.push(P([T(prefix + "-hs", "The People also seek the blood sample already drawn by the hospital for medical care.")]));
+  if (val("vehicleItems")) blocks.push(P([T(prefix + "-vi", "Vehicle items sought: "), O("vehicleItems")]));
+  if (on("edr")) {
+    blocks.push(P([T(prefix + "-edr", "The People seek data from the manufacturer-installed recording device, limited to data directly related to this offense, and only as Vehicle Code 9951 describes that data. Penal Code 1524(a)(19) applies when the offense involving a motor vehicle results in death or serious bodily injury.")]));
+    if (kind === "other") blocks.push(P([T(prefix + "-edr2", "The injury described above is not marked as death or serious bodily injury. Do not rely on Penal Code 1524(a)(19) unless that showing is made.")]));
+  }
+  if (on("bloodPhone")) {
+    blocks.push(P([T(prefix + "-ph", "A phone is also sought. Describe it with particularity in the facts. Penal Code 1546.1(d).")]));
+  }
+  return blocks;
+}
+
+function docNote911() {
+  return {
+    id: "stop",
+    title: "No filing",
+    filename: "No-filing.docx",
+    blocks: courtHead("NO MOTION AND NO NOTICE", "S").concat([
+      P([T("S-1", "This request answered an emergency 911 call from the same phone. Penal Code 1546.1(h) and Penal Code 1546.2(a)(2) say the three-court-day filing and the notice do not apply. Do not file a motion. Do not send notice.")])
+    ])
+  };
+}
+function docNight() {
+  return {
+    id: "route",
+    title: "Routing sheet",
+    filename: "Routing-sheet.docx",
+    blocks: [
+      C([T("N-1", "MILL VALLEY POLICE DEPARTMENT")]),
+      C([T("N-2", "ROUTING SHEET — NIGHT DUI BLOOD")]),
+      { kind: "rule" },
+      P([T("N-3", "This is not the department blood form. That form is on the department shared drive and was not supplied to this page. Use that form.")]),
+      P([T("N-4", "Sergeant review only. Do not email a deputy district attorney for this pre-approved night form.")]),
+      P([T("N-5", "Dispatch calls the phlebotomist to the station or to jail booking.")]),
+      P([T("N-6", "If the driver resists, the sergeant decides.")]),
+      P([T("N-7", "The property sheet showing the blood was obtained is what the mag room files, before the end of the shift.")]),
+      P([T("N-8", "Case "), O("caseNumber"), T("N-9", ". Officer "), O("officerName"), T("N-10", ", badge "), O("badge"), T("N-11", ".")])
+    ]
+  };
+}
+function affidavitDoc() {
+  const blocks = courtHead("AFFIDAVIT FOR SEARCH WARRANT", "A");
+  blocks.push(P([
+    T("A-1", "I, "), O("officerName"), T("A-2", ", badge "), O("badge"),
+    T("A-3", ", am a peace officer of the Mill Valley Police Department, Marin County, California. I have been a peace officer for "),
+    O("years"), T("A-4", " years. My assignment is "), O("assignment"),
+    T("A-5", ". My relevant training is: "), O("training"), T("A-6", ".")
+  ]));
+  blocks.push(P([T("A-7", "I am investigating case "), O("caseNumber"), T("A-8", ". The crime type is "), O("crimeType"), T("A-9", ".")]));
+  if (state.type === "place") {
+    blocks.push(P([T("A-10", "The offense is "), O("offense"), T("A-11", ". The ground I ask the court to use is "), ...groundRuns(), T("A-12", ".")]));
+    blocks.push(HD("Place or person to be searched", "A-H1"));
+    blocks.push(P(placeRuns()));
+    blocks.push(HD("Property to be seized", "A-H2"));
+    blocks.push(P([O("items")]));
+    if (on("phones")) {
+      blocks.push(P([T("A-PH", "Electronic devices are included: "), O("phoneDesc"), T("A-PH2", ". Time period: "), O("phoneWindow"), T("A-PH3", ". Types of information: "), O("phoneData")]));
+    }
+  } else if (state.type === "blood") {
+    blocks.push(P([T("A-B1", "I ask for a blood sample from "), O("driverName"), T("A-B2", ", date of birth "), O("driverDob"), T("A-B3", ". The driver is at the "), O("driverWhere"), T("A-B4", ". The Vehicle Code section is "), O("offense"), T("A-B5", ".")]));
+    const status = val("bloodStatus");
+    if (status === "refused") blocks.push(P([T("A-B6", "The driver refused a blood test requested under Vehicle Code 23612. Penal Code 1524(a)(13).")]));
+    else if (status === "incomplete") blocks.push(P([T("A-B7", "The driver did not complete a blood test required by Vehicle Code 23612. Penal Code 1524(a)(13).")]));
+    else blocks.push(P([T("A-B8", "Penal Code 1524(a)(13) covers a driver who refused or did not complete a blood test under Vehicle Code 23612. That is not what is marked above. The facts have to carry the showing, and the deputy district attorney should see this before it is signed.")]));
+    blocks.push(...majorBlocks("A"));
+  } else if (state.type === "records") {
+    blocks.push(P([T("A-R1", "I ask for records from "), O("company"), T("A-R2", " for account "), O("accountId"), T("A-R3", ". The offense is "), O("offense"), T("A-R4", ". The time period is "), O("recWindow"), T("A-R5", ".")]));
+    blocks.push(P([T("A-R6", "The categories sought are: "),
+      T("A-R7", on("recSubscriber") ? "subscriber information; " : ""),
+      T("A-R8", on("recLogs") ? "logs; " : ""),
+      T("A-R9", on("recContent") ? "content; " : ""),
+      O("recOther")]));
+    blocks.push(P([T("A-R10", "One warrant is for one company.")]));
+  } else if (state.type === "device") {
+    blocks.push(P([T("A-D1", "The device is already in department custody. "), O("deviceDesc"), T("A-D2", ". It is held at "), O("deviceWhere"), T("A-D3", ". How the department has it: "), O("deviceHow"), T("A-D4", ".")]));
+    blocks.push(P([T("A-D5", "The offense is "), O("offense"), T("A-D6", ". Time period: "), O("phoneWindow"), T("A-D7", ". Information sought: "), O("phoneData")]));
+    blocks.push(P([T("A-D8", "Mill Valley detectives do the extraction. Another agency may help unlock the device.")]));
+  } else if (state.type === "tracker") {
+    blocks.push(P([T("A-T1", "This is a tracking-device warrant under Penal Code 1524(a)(12) and Penal Code 1534(b). Paragraph (a)(12) is the tracking-device ground. It reaches a felony, and it also reaches a Fish and Game Code or Public Resources Code misdemeanor when the information will come from the tracking device. It is not a general warrant to search a house for those misdemeanors.")]));
+    blocks.push(P([T("A-T2", "Who or what will be tracked: "), O("trackWhat"), T("A-T3", ". Where it will be installed, or who holds the data: "), O("trackWhere"), T("A-T4", ". The offense is "), O("offense"), T("A-T5", ".")]));
+    blocks.push(P([T("A-T6", "The device may be used only in California, for a reasonable time not to exceed 30 days from the date the warrant is issued. Penal Code 1534(b)(1) and (b)(5). Days requested, if less than that maximum: "), O("trackDays"), T("A-T7", ".")]));
+  }
+  blocks.push(HD("Facts", "A-HF"));
+  blocks.push(...factParas(val("facts"), "A-F"));
+  blocks.push(...nightBlocks("A"));
+  if (electronicMatter() || state.type === "records") blocks.push(...calecpaBlocks("A"));
+  if (on("hobbs")) blocks.push(P([T("A-HB", "Facts that would identify a confidential source are in sealed Attachment A only. Attachment A is not to be served and not to be left behind.", "hobbs")]));
+  if (geofenceHit()) blocks.push(P([T("A-GEO", "This affidavit does not ask for a geofence warrant or a location-history dump. Chatrie v. United States (June 29, 2026) 609 U.S. 605 held that acquiring that Google location data is a search. Take any geofence request out before this packet is sent.")]));
+  blocks.push(...exhibitBlocks());
+  blocks.push(...officerSign("A"));
+  return { id: "affidavit", title: "Affidavit", filename: "Affidavit.docx", blocks: blocks };
+}
+function warrantDoc() {
+  const blocks = courtHead("SEARCH WARRANT", "W");
+  blocks.push(C([T("W-co", "County of Marin")]));
+  blocks.push(P([T("W-1", "The people of the State of California to any peace officer in the County of Marin:")]));
+  blocks.push(P([T("W-2", "Proof, by affidavit, having been this day made before me by "), O("officerName"), T("W-3", ", that there is probable cause as stated in the affidavit, you are therefore commanded, ")]));
+  if (state.type === "tracker") {
+    blocks.push(P([T("W-4t", on("night") ? "at any time for which good cause is initialed below, " : "in the daytime (6 a.m. to 10 p.m.), "), T("W-5t", "to install a tracking device or to serve this warrant on the third party who holds the tracking data, for: "), O("trackWhat"), T("W-6t", ". Install only in California. The use shall not exceed 30 days from the date this warrant is issued unless the court extends it. Penal Code 1524(a)(12); Penal Code 1534(b).")]));
+  } else if (on("night")) {
+    blocks.push(P([T("W-4n", "at any time of the day or night, if the night-service line below is initialed, otherwise only between 7 a.m. and 10 p.m., ")]));
+  } else if (state.type !== "records" && state.type !== "device") {
+    blocks.push(P([T("W-4d", "in the daytime, between 7 a.m. and 10 p.m. only, ")]));
+  } else {
+    blocks.push(P([T("W-4e", "to the provider named in the affidavit, ")]));
+  }
+  if (state.type === "place") {
+    blocks.push(P([T("W-p1", "to search "), ...placeRuns(), T("W-p2", " for the following property: "), O("items")]));
+    if (on("phones")) blocks.push(P([T("W-p3", " including the electronic devices and the categories of information described in the affidavit.")]));
+  } else if (state.type === "blood") {
+    blocks.push(P([T("W-b1", "to obtain a blood sample from "), O("driverName"), T("W-b2", ", drawn in a reasonable, medically approved manner.")]));
+    blocks.push(...majorBlocks("W"));
+  } else if (state.type === "records") {
+    blocks.push(P([T("W-r1", "to seize from "), O("company"), T("W-r2", " the records described in the affidavit for the account "), O("accountId"), T("W-r3", ", limited to the time period "), O("recWindow"), T("W-r4", ".")]));
+  } else if (state.type === "device") {
+    blocks.push(P([T("W-d1", "to search the device already in custody, "), O("deviceDesc"), T("W-d2", ", for the categories and time period stated in the affidavit.")]));
+  }
+  blocks.push(P([T("W-bring", "If you find the same or any part thereof, bring it before me at the Superior Court of California, County of Marin, subject to the order of the court. Penal Code 1528 and 1529.")]));
+  if (on("night")) blocks.push(initialLine("W-IN", state.type === "tracker" ? "Night installation" : "Night service"));
+  if (on("delay")) blocks.push(initialLine("W-ID", "Delayed notice and non-disclosure"));
+  if (on("seal")) blocks.push(initialLine("W-IS", "Sealing"));
+  if (on("unlock")) blocks.push(initialLine("W-IU", "Fingerprint or face unlock"));
+  if (on("fiveDay")) blocks.push(initialLine("W-I5", "Five-business-day production"));
+  if (electronicMatter() || state.type === "records") blocks.push(...calecpaBlocks("W"));
+  blocks.push(...nightBlocks("W"));
+  blocks.push(...judgeSign("W"));
+  return { id: "warrant", title: "Warrant", filename: "Warrant.docx", blocks: blocks };
+}
+function attachmentDoc() {
+  const blocks = courtHead("SEALED ATTACHMENT A", "H");
+  blocks.push(P([T("H-1", "SEALED. NOT FOR SERVICE. Do not serve this attachment. Do not leave it at the scene. Do not put it in any copy that is handed to a person outside the investigation.", "hobbs")]));
+  blocks.push(HD("Confidential facts", "H-H"));
+  blocks.push(...factParas(val("hobbsFacts"), "H-F"));
+  blocks.push(...officerSign("H"));
+  return { id: "attachment", title: "Sealed Attachment A", filename: "Attachment-A-SEALED.docx", blocks: blocks };
+}
+function preservationDoc() {
+  const blocks = [
+    C([T("P-h", "MILL VALLEY POLICE DEPARTMENT")]),
+    C([T("P-t", "PRESERVATION REQUEST")]),
+    { kind: "rule" },
+    P([T("P-1", "To: "), O("company")]),
+    P([T("P-2", "Penal Code 1524.3(g). Please preserve the records and other evidence in your possession for the account below, pending a search warrant. Keep them for 90 days. I may renew this request once, for another 90 days.")]),
+    P([T("P-3", "Account: "), O("accountId")]),
+    P([T("P-4", "Time period: "), O("recWindow")]),
+    P([T("P-5", "Date of this request: "), OD("preserveDate")]),
+    P([T("P-6", "Officer "), O("officerName"), T("P-7", ", badge "), O("badge"), T("P-8", ", Mill Valley Police Department. Case "), O("caseNumber"), T("P-9", ".")])
+  ];
+  return { id: "preservation", title: "Preservation letter", filename: "Preservation-letter.docx", blocks: blocks };
+}
+function receiptDoc() {
+  const title = state.type === "records" ? "PROOF OF SERVICE" : "RECEIPT FOR PROPERTY TAKEN";
+  const blocks = courtHead(title, "RC");
+  if (state.type === "records") {
+    blocks.push(P([T("RC-1", "This page records service on the company and the portal confirmation. It is not a receipt for property taken from a person under Penal Code 1535.")]));
+    blocks.push(P([T("RC-2", "Company: "), O("company")]));
+    blocks.push(P([T("RC-3", "Portal confirmation or proof of delivery: "), OP("portalConfirm")]));
+  } else {
+    blocks.push(P([T("RC-4", "Received from the search described in the warrant in case "), O("caseNumber"), T("RC-5", ", the following property (Penal Code 1535):")]));
+    blocks.push(P([OP("inventory")]));
+    blocks.push(P([T("RC-6", "If no person was present, leave this receipt where the property was found.")]));
+  }
+  blocks.push(P([T("RC-7", "Officer signature: ________________________________ Date: "), OPD("serveDate")]));
+  return { id: "receipt", title: state.type === "records" ? "Receipt" : "Receipt", filename: "Receipt.docx", blocks: blocks };
+}
+function propertyDoc() {
+  const blocks = courtHead("PROPERTY SHEET", "PS");
+  blocks.push(P([T("PS-1", "Case "), O("caseNumber"), T("PS-2", ". Driver: "), O("driverName"), T("PS-3", ".")]));
+  blocks.push(P([T("PS-4", "Blood obtained: "), OP("bloodGot"), T("PS-5", ". Drawn by: "), OP("phlebotomist"), T("PS-6", ". Time: "), OP("bloodTime")]));
+  blocks.push(P([T("PS-7", "This is the sheet emailed to the mag room for a blood draw. The department blood form, if this is the night draw, is the one on the shared drive.")]));
+  blocks.push(P([T("PS-8", "Officer signature: ________________________________")]));
+  return { id: "property", title: "Property sheet", filename: "Property-sheet.docx", blocks: blocks };
+}
+function returnDoc() {
+  const blocks = courtHead("RETURN", "R");
+  blocks.push(P([T("R-1", "I am the officer who received this warrant. No judge signs this return.")]));
+  blocks.push(P([T("R-2", "Date of service or execution: "), OPD("serveDate"), T("R-3", ". Time: "), OP("serveTime")]));
+  blocks.push(P([T("R-4", "Place of service: "), OP("serveWhere")]));
+  blocks.push(P([T("R-5", "Property taken, or \"nothing taken\": "), OP("inventory")]));
+  blocks.push(P([T("R-6", "A return is required even when nothing is taken. Penal Code 1534.")]));
+  blocks.push(P([T("R-7", "Officer signature: ________________________________"), T("R-8", " "), O("officerName")]));
+  return { id: "return", title: "Return", filename: "Return.docx", blocks: blocks };
+}
+function amendedDoc() {
+  const blocks = courtHead("AMENDED RETURN", "AR");
+  blocks.push(P([T("AR-1", "I am the officer who executed the warrant in case "), O("caseNumber"), T("AR-2", ". Since the return, the following additional items were received:")]));
+  blocks.push(P([OP("amendItems")]));
+  if (state.type === "records" || state.type === "device") {
+    blocks.push(P([T("AR-3", "The custodian of records declaration is attached.", "custodian")]));
+  }
+  blocks.push(P([T("AR-4", "No judge signs this amended return. Email it to the mag room.")]));
+  blocks.push(P([T("AR-5", "Officer signature: ________________________________")]));
+  return { id: "amended", title: "Amended return", filename: "Amended-return.docx", blocks: blocks };
+}
+function noticeDoc() {
+  const blocks = courtHead("NOTICE", "N");
+  blocks.push(P([T("N-1", "To: "), O(state.type === "ping" ? "phone" : "noticeTo"), T("N-2", ".")], ));
+  const who = state.type === "records" ? O("company") : O("officerName");
+  blocks.push(P([T("N-3", "Information about you was obtained by the Mill Valley Police Department", "notices"), T("N-4", " in case "), O("caseNumber"), T("N-5", ". The nature of the investigation is: "), O("crimeType"), T("N-6", " / "), O("offense"), T("N-7", ".")]));
+  if (state.type === "ping") {
+    blocks.push(P([T("N-8", "The information was location information obtained in an emergency. A written statement of the facts giving rise to the emergency is in the motion filed with the court. Penal Code 1546.2(a).", "notices")]));
+    blocks.push(P([T("N-9", "Department practice for this page: give this notice the same day the first result is obtained, unless the court delays it. Penal Code 1546.2(a)(1) allows up to three court days for emergency notice. This page uses the shorter practice.", "notices")]));
+  } else if (state.type === "pen") {
+    blocks.push(P([T("N-10", "A pen register or trap and trace order was used. Notice is due no later than 30 days after the order ends, unless the court delays it. Penal Code 638.54. This notice is model wording.", "notices")]));
+  } else if (state.type === "tracker") {
+    blocks.push(P([T("N-11", "A tracking device was used. Notice is due no later than 10 calendar days after the use ends, unless the court delays it. Penal Code 1534(b)(4).", "notices")]));
+  } else {
+    blocks.push(P([T("N-12", "Notice of a warrant for electronic information is due when the warrant is executed, unless the court delays it. Penal Code 1546.2(a)(1).", "notices")]));
+  }
+  blocks.push(P([T("N-13", "If there is no identified target, send the notice information to the California Department of Justice within three days. Penal Code 1546.2(c). The code section does not name CLEW. CLEW is the channel named for this department's practice.", "notices")]));
+  blocks.push(P([T("N-14", "Officer "), O("officerName"), T("N-15", ", Mill Valley Police Department.")]));
+  return { id: "notice", title: "Notice", filename: "Notice.docx", blocks: blocks };
+}
+function delayDoc() {
+  const ping = state.type === "ping";
+  const blocks = courtHead(ping ? "REQUEST TO DELAY NOTICE" : "EXTENSION OF DELAYED NOTICE", "X");
+  blocks.push(P([T("X-1", "The People ask the court to delay notice, and to prohibit any party providing information from notifying any other party, for a period not to exceed 90 days. The adverse result is: ", "delay"), O("delayReason"), T("X-2", ".", "nondisclosure")]));
+  blocks.push(P([T("X-3", ping ? "This request is made with the motion under Penal Code 1546.1(h) and Penal Code 1546.2(b)." : "This request is made under Penal Code 1546.2(b). For a pen register, the delay statute is Penal Code 638.54.", "delay")]));
+  blocks.push(P([T("X-4", "Decide whether to ask for an extension at least two weeks before the notice date. An extension, if granted, may be up to 90 days more.", "delay")]));
+  blocks.push(...officerSign("X"));
+  blocks.push(...judgeSign("X"));
+  return { id: "delaydoc", title: ping ? "Delay request" : "Extension of delayed notice", filename: ping ? "Delay-request.docx" : "Extension-of-delayed-notice.docx", blocks: blocks };
+}
+function motionDoc() {
+  const blocks = courtHead("MOTION AND ORDER", "M");
+  blocks.push(HD("Declaration", "M-H1"));
+  blocks.push(P([T("M-1", "I, "), O("officerName"), T("M-2", ", badge "), O("badge"), T("M-3", ", am a peace officer of the Mill Valley Police Department. I make this declaration in support of a motion under Penal Code 1546.1(h) seeking approval of an emergency disclosure. This filing is a motion, not a warrant.")]));
+  blocks.push(P([T("M-4", "Danger of death or serious physical injury: "), O("danger")]));
+  blocks.push(P([T("M-5", "Why a warrant could not be obtained in time: "), O("whyNoWarrant")]));
+  blocks.push(P([T("M-6", "On "), OD("requestDate"), T("M-7", " at "), ...OT("requestTime"), T("M-8", ", Sergeant "), O("approveSgt"), T("M-9", " approved an emergency request. The communications center made the request to "), O("carrier"), T("M-10", " for telephone number "), O("phone"), T("M-11", ". What was asked: "), O("requestWhat"), T("M-12", ".")]));
+  blocks.push(P([T("M-13", "The first result was obtained on "), OD("firstDate"), T("M-14", " at "), ...OT("firstTime"), T("M-15", ". It was: "), O("firstResult")]));
+  blocks.push(...factParas(val("laterResults"), "M-L"));
+  blocks.push(HD("Facts", "M-H2"));
+  blocks.push(...factParas(val("facts"), "M-F"));
+  if (on("delay")) blocks.push(P([T("M-16", "A separate request to delay notice is attached. The adverse result is: ", "nondisclosure"), O("delayReason"), T("M-17", ".", "delay")]));
+  blocks.push(...exhibitBlocks());
+  blocks.push(...officerSign("M"));
+  blocks.push(HD("Order", "M-H3"));
+  blocks.push(P([T("M-18", "The court has read the declaration. The court does, or does not, find that the facts gave rise to an emergency involving danger of death or serious physical injury that required access without delay. If the court finds there was no emergency, or rejects this motion, the court orders immediate destruction of the information and immediate notice if notice has not already been given. Penal Code 1546.1(h).")]));
+  if (on("delay")) blocks.push(initialLine("M-ID", "Delay of notice"));
+  blocks.push(...judgeSign("M"));
+  return { id: "motion", title: "Motion and order", filename: "Motion-and-order.docx", blocks: blocks };
+}
+function penDoc() {
+  const kind = val("penKind") === "pen" ? "a pen register" : val("penKind") === "trap" ? "a trap and trace device" : "a pen register and a trap and trace device";
+  const blocks = courtHead("APPLICATION AND ORDER — PEN REGISTER / TRAP AND TRACE", "PR");
+  blocks.push(HD("Application", "PR-H1"));
+  blocks.push(P([T("PR-1", "I, "), O("officerName"), T("PR-2", ", badge "), O("badge"), T("PR-3", ", a peace officer of the Mill Valley Police Department, apply under Penal Code 638.52 for an order authorizing "), T("PR-4", kind), T("PR-5", ".")]));
+  blocks.push(P([T("PR-6", "I certify that the information likely to be obtained is relevant to an ongoing criminal investigation. The offense is "), O("offense"), T("PR-7", ". Case "), O("caseNumber"), T("PR-8", ".")]));
+  blocks.push(P([T("PR-9", "Telephone number: "), O("phone"), T("PR-10", ". Subscriber, if known: "), O("subscriber"), T("PR-11", ". Person under investigation, if known: "), O("penTarget"), T("PR-12", ". Carrier: "), O("carrier"), T("PR-13", ".")]));
+  blocks.push(HD("Facts", "PR-H2"));
+  blocks.push(...factParas(val("facts"), "PR-F"));
+  blocks.push(P([T("PR-14", "The order must not include information that discloses the physical location of the subscriber, except so far as the location may be determined from the telephone number. Penal Code 638.52(c). This packet does not ask for a geofence or for cell-site location.")] ));
+  if (on("delay")) blocks.push(P([T("PR-15", "The People also ask to delay notice under Penal Code 638.54. Adverse result: ", "delay"), O("delayReason")]));
+  blocks.push(...officerSign("PR"));
+  blocks.push(HD("Order", "PR-H3"));
+  blocks.push(P([T("PR-16", "The court finds that the information likely to be obtained is relevant to an ongoing investigation and that there is probable cause to believe the pen register or trap and trace device will lead to evidence of the offense stated above. Penal Code 638.52(b).")]));
+  blocks.push(P([T("PR-17", "The order covers "), O("phone"), T("PR-18", ", for a period not to exceed 60 days. Penal Code 638.52(e).")]));
+  blocks.push(P([T("PR-19", "The carrier shall furnish the information, facilities, and technical assistance needed to install the device. Penal Code 638.52(d)(5).")]));
+  blocks.push(P([T("PR-20", "This order is sealed until the order, including any extensions, expires. The person who owns or leases the line shall not disclose the pen register, the trap and trace, or the investigation to the listed subscriber or to any other person. Penal Code 638.52(g).", "sealorder")]));
+  blocks.push(...judgeSign("PR"));
+  return { id: "combined", title: "Application and order", filename: "Pen-register.docx", blocks: blocks };
+}
+function rameyDoc() {
+  const blocks = courtHead("WARRANT OF PROBABLE CAUSE FOR ARREST", "RY");
+  blocks.push(HD("Declaration of probable cause", "RY-H1"));
+  blocks.push(P([T("RY-1", "I, "), O("officerName"), T("RY-2", ", badge "), O("badge"), T("RY-3", ", am a peace officer of the Mill Valley Police Department. I declare under Penal Code 817 that there is probable cause that the offense below was committed and that the person named committed it. This warrant does not begin a complaint. Penal Code 817(a)(2).")]));
+  blocks.push(P([T("RY-4", "Person: "), O("personName"), T("RY-5", ". "), O("personDesc")]));
+  blocks.push(P([T("RY-6", "Crime: "), O("offense"), T("RY-7", ". Case "), O("caseNumber"), T("RY-8", ".")]));
+  blocks.push(...factParas(val("facts"), "RY-F"));
+  blocks.push(...officerSign("RY"));
+  blocks.push(HD("Warrant", "RY-H2"));
+  blocks.push(P([T("RY-9", "County of Marin, State of California.")]));
+  blocks.push(P([T("RY-10", "The people of the State of California to any peace officer of the State:")]));
+  blocks.push(P([T("RY-11", "Proof by declaration under penalty of perjury having been made this day to me by "), O("officerName"), T("RY-12", ", I find that there is probable cause to believe that the crime of "), O("offense"), T("RY-13", " has been committed by the defendant named and described below.")]));
+  blocks.push(P([T("RY-14", "Therefore, you are commanded to arrest "), O("personName"), T("RY-15", " and to bring the defendant before any magistrate in Marin County pursuant to Sections 821, 825, 826, and 848 of the Penal Code.")]));
+  blocks.push(P([T("RY-16", "Defendant is admitted to bail in the amount of "), O("bail"), T("RY-17", ".")]));
+  blocks.push(P([T("RY-18", "A felony arrest may be made on any day and at any time. Penal Code 840, by way of Penal Code 817(a)(2).")]));
+  blocks.push(...judgeSign("RY"));
+  blocks.push(HD("Certificate of service", "RY-H3"));
+  blocks.push(P([T("RY-19", "After the arrest, Penal Code 817(i) requires a certificate of service filed with the clerk. Email it to the mag room, which is this county's filing point. No judge signs it.")]));
+  blocks.push(P([T("RY-20", "Date and time of service: "), OPD("serveDate"), T("RY-21", " "), OP("serveTime")]));
+  blocks.push(P([T("RY-22", "Name of the defendant arrested: "), O("personName")]));
+  blocks.push(P([T("RY-23", "Location of the arrest: "), OP("serveWhere")]));
+  blocks.push(P([T("RY-24", "Location where the defendant was incarcerated: "), OP("jailWhere")]));
+  blocks.push(P([T("RY-25", "Officer signature: ________________________________")]));
+  return { id: "combined", title: "Warrant", filename: "Ramey-warrant.docx", blocks: blocks };
+}
+function documents() {
+  if (!state.type) return [];
+  if (stopped911()) return [docNote911()];
+  if (nightFormOnly()) return [docNight()];
+  if (state.type === "ping") {
+    const docs = [motionDoc()];
+    if (needsNotice()) docs.push(noticeDoc());
+    if (on("delay")) docs.push(delayDoc());
+    return docs;
+  }
+  if (state.type === "pen") {
+    const docs = [penDoc()];
+    docs.push(noticeDoc());
+    if (on("delay")) docs.push(delayDoc());
+    return docs;
+  }
+  if (state.type === "ramey") return [rameyDoc()];
+  const docs = [affidavitDoc(), warrantDoc()];
+  if (on("hobbs")) docs.push(attachmentDoc());
+  if (state.type === "records") docs.push(preservationDoc());
+  if (state.type === "blood") docs.push(propertyDoc());
+  else if (state.type === "place" || state.type === "device" || state.type === "records") docs.push(receiptDoc());
+  docs.push(returnDoc());
+  if (state.type === "place" || state.type === "records" || state.type === "device" || state.type === "blood" || state.type === "tracker") docs.push(amendedDoc());
+  if (needsNotice()) docs.push(noticeDoc());
+  if (on("delay")) docs.push(delayDoc());
+  return docs;
+}
+function plainText(doc) {
+  return doc.blocks.map(function (b) {
+    if (b.kind === "img") return "[Exhibit image]";
+    if (b.kind === "rule") return "";
+    return (b.runs || []).map(function (r) { return r.text; }).join("");
+  }).filter(function (x) { return x !== ""; }).join("\n");
+}
+function gapsInPacket() {
+  const found = {};
+  documents().forEach(function (doc) {
+    doc.blocks.forEach(function (b) {
+      (b.runs || []).forEach(function (r) { if (r.gap) found[r.gap] = true; });
+    });
+  });
+  return Object.keys(GAP_LABELS).filter(function (k) { return found[k]; }).map(function (k) { return GAP_LABELS[k]; });
+}
+
+function anchorIssue() { return val("issueDate"); }
+function pingMotionDue() { return courtDaysAfter(val("firstDate"), 3); }
+function delayEndFrom(start) {
+  if (!parseISO(start)) return "";
+  return addCal(start, 90);
+}
+function decideBy(deadline) {
+  if (!parseISO(deadline)) return "";
+  return addCal(deadline, -14);
+}
+function dateRows() {
+  const rows = [];
+  const t = state.type;
+  if (!t || stopped911() || nightFormOnly()) return rows;
+  if (t === "ping") {
+    const due = pingMotionDue();
+    rows.push({ label: "Motion due (3 court days after the first result)", value: showDate(due) });
+    if (!on("delay")) rows.push({ label: "Notice (same day as the first result)", value: showDate(val("firstDate")) });
+    else {
+      const end = delayEndFrom(val("firstDate"));
+      rows.push({ label: "Delayed notice ends", value: showDate(end) });
+      rows.push({ label: "Decide on an extension by", value: showDate(decideBy(end)) });
+    }
+    const destroy = val("firstDate") ? addCal(val("firstDate"), 90) : "";
+    rows.push({ label: "Destruction date used on this page (90 days from the first result)", value: showDate(destroy) + " This 90-day destruction date is the practice set for this page. Penal Code 1546.1(g) is a 90-day rule for voluntary disclosures, not for this emergency request. If the court rejects the motion, destruction is immediate under Penal Code 1546.1(h)." });
+    return rows;
+  }
+  const issue = anchorIssue();
+  const day10 = executionDay(issue);
+  const magServe = post("magServeBy");
+  let serveLimit = day10;
+  if (magServe && day10 && magServe < day10) serveLimit = magServe;
+  if (t !== "ramey" && t !== "pen") {
+    rows.push({ label: "Last day to execute (day of issuance not counted)", value: showDate(day10) });
+    rows.push({ label: "Return by", value: showDate(returnBy(issue)) + (day10 && (isWeekend(day10) || isHoliday(day10)) ? " Day 10 is not a court day, so file the return by the court day before it." : "") });
+    if (magServe) rows.push({ label: "Mag room serve-by", value: showDate(magServe) + (day10 && magServe < day10 ? " This is earlier than day 10, so it controls." : " Day 10 is earlier or the same, so day 10 still controls.") });
+  }
+  if (t === "records") {
+    const service = post("serveDate");
+    const magDue = post("magRecordsDue");
+    const calc = service ? businessDaysAfter(service, 5) : "";
+    rows.push({ label: "Records due", value: magDue ? showDate(magDue) + " (mag room date)" : (calc ? showDate(calc) + " (5 business days after the service date you enter; weekends and the court holidays in this table are skipped)" : "Enter the service date, or the mag room's records-due date.") });
+    if (serveLimit) rows.push({ label: "Serve the company by", value: showDate(serveLimit) });
+  }
+  if (t === "tracker") {
+    const endMax = issue ? addCal(issue, 30) : "";
+    rows.push({ label: "Tracking maximum (30 days from issuance, issue date not counted)", value: showDate(endMax) });
+    const ended = post("trackEnded") || endMax;
+    const back = ended ? addCal(ended, 10) : "";
+    rows.push({ label: "Return and notice (10 calendar days after use ends)", value: showDate(back) });
+  }
+  if (t === "pen") {
+    const end = issue ? addCal(issue, 60) : "";
+    const notice = end ? addCal(end, 30) : "";
+    rows.push({ label: "Order ends (60 days, issue date not counted)", value: showDate(end) });
+    rows.push({ label: "Notice (30 days after the order ends)", value: showDate(notice) });
+    if (on("delay") && notice) {
+      rows.push({ label: "Decide on a delay by", value: showDate(decideBy(notice)) });
+    }
+  }
+  if (on("delay") && t !== "pen" && t !== "ping") {
+    const end = delayEndFrom(issue);
+    rows.push({ label: "Delayed notice ends (90 days from the sign date)", value: showDate(end) });
+    rows.push({ label: "Decide on an extension by", value: showDate(decideBy(end)) });
+  } else if (needsNotice() && t !== "pen" && t !== "tracker" && t !== "ping") {
+    rows.push({ label: "Notice", value: "When the warrant is executed, unless a delay is initialed. Penal Code 1546.2(a)(1)." });
+  }
+  const served = post("serveDate");
+  if (served && day10 && served > day10 && t !== "ramey" && t !== "pen") {
+    rows.push({ label: "Service date", value: showDate(served) + " This is after day 10. Penal Code 1534: the warrant is void." });
+  }
+  return rows;
+}
+
+function conditionLabels() {
+  const out = [];
+  if (on("night")) out.push(state.type === "tracker" ? "Night installation" : "Night service");
+  if (on("major")) out.push("Major collision DUI");
+  if (on("portal")) out.push("Electronic / portal service");
+  if (on("fiveDay")) out.push("5-business-day production");
+  if (on("delay")) out.push("90-day delayed notice and non-disclosure");
+  if (on("seal")) out.push("Sealing order");
+  if (on("hobbs")) out.push("Hobbs confidential attachment");
+  if (on("unlock")) out.push("Fingerprint or face unlock");
+  if (state.type === "pen") out.push("Seal until the order expires (in the order itself)");
+  return out;
+}
+function routeLines() {
+  if (stopped911()) return ["No motion and no notice. Record in the case file that the ping answered a 911 call from the same phone."];
+  if (state.type === "ping") return [
+    "The on-duty sergeant has already approved the ping, and the communications center has already made the request.",
+    "Call the communications center and ask who the on-call judge is.",
+    "Call the judge. Email the motion where the judge says. The judge signs by email.",
+    "Forward the signed order to the mag room.",
+    "Do not send this motion through a deputy district attorney."
+  ];
+  if (nightFormOnly()) return [
+    "Use the pre-approved DUI blood form on the department shared drive.",
+    "Sergeant review only.",
+    "Dispatch calls the phlebotomist to the station or to jail booking.",
+    "If the driver resists, the sergeant decides.",
+    "Email the property sheet to the mag room before the end of the shift."
+  ];
+  const lines = [];
+  if (on("major")) lines.push("The communications center calls the deputy district attorney out to the scene.");
+  lines.push("The sergeant reviews first and holds the checklist and risk forms.");
+  lines.push("Email the affidavit and the warrant to the deputy district attorney who handles this crime type. That review is strongly encouraged, not required. After hours, the on-call deputy district attorney is reached through the communications center.");
+  lines.push("The deputy district attorney copies the mag room at " + MAG_ROOM + ".");
+  lines.push("The mag room separates the affidavit from the warrant and sends back the final warrant, a custodian of records sheet when one is needed, and the serve-by and records-due dates.");
+  lines.push("Sign, scan to one PDF, call the communications center for the on-call judge, call the judge, and email the packet where the judge says. The judge signs by email. Penal Code 1526(c).");
+  lines.push("Forward the signed pages to the mag room.");
+  lines.push("You sign the return and email it to the mag room. No judge signs the return.");
+  return lines;
+}
+function emailCards() {
+  if (stopped911()) return [];
+  if (state.type === "ping") {
+    return [
+      { who: "On-call judge", how: "Call the communications center, then call the judge. Email the motion where the judge says." },
+      { who: "Mag room", how: MAG_ROOM + " — forward the signed order. There is no deputy district attorney line on this path." }
+    ];
+  }
+  if (nightFormOnly()) {
+    return [
+      { who: "Sergeant", how: "Sergeant review only for the pre-approved night form." },
+      { who: "Mag room", how: MAG_ROOM + " — the property sheet, before the end of the shift." }
+    ];
+  }
+  const da = val("daEmail") ? (val("daName") ? val("daName") + " <" + val("daEmail") + ">" : val("daEmail")) : "The deputy DA list by crime type has not been supplied. Enter the deputy DA who handles " + (val("crimeType") || "this crime type") + ".";
+  return [
+    { who: "Deputy DA", how: da },
+    { who: "Mag room", how: MAG_ROOM }
+  ];
+}
+function reminders() {
+  const out = [];
+  out.push("A condition is granted only if the judge initials it. Not initialed means not granted.");
+  if (state.type === "records") out.push("One warrant per company.");
+  if (state.type === "place" || state.type === "blood" || state.type === "device") out.push("Do not hand out the affidavit.");
+  if (on("hobbs")) out.push("Do not serve the sealed attachment, and do not leave it behind.");
+  if (state.type === "place" && val("placeKind") !== "person" || state.type === "tracker") out.push("Make the RISSafe (WSIN) entry. Detectives make that entry.");
+  if (state.type === "device") out.push("Detectives do the extraction. Another agency may help with unlocking. Detectives are the backup for a company portal.");
+  if (state.type === "records") out.push("Detectives are the backup for the company portal submission.");
+  if (geofenceHit()) out.push("This page will not draft a geofence warrant.");
+  if (on("unlock")) out.push("The fingerprint or face-unlock sentence is model wording. No statute was verified that specifically authorizes it.");
+  if (state.type !== "ping" && state.type !== "ramey" && state.type !== "pen" && !nightFormOnly()) out.push("Property taken on a warrant is released only by court order. Penal Code 1536.");
+  return out;
+}
+function reviewNextText() {
+  if (!state.type) return "Pick a warrant type.";
+  if (stopped911()) return "No filing. Record it in the case file.";
+  if (nightFormOnly()) return "Take the department form to the sergeant.";
+  if (on("major") && state.type === "blood") return "Have the communications center call the deputy DA out to the scene.";
+  if (state.type === "ping") return "Call the communications center and ask for the on-call judge.";
+  return "Take this packet to the sergeant.";
+}
+
+function item(id, group, title, opts) {
+  opts = opts || {};
+  return { id: id, group: group, title: title, detail: opts.detail || "", due: opts.due || "", doc: opts.doc || "", fields: opts.fields || [] };
+}
+function checklist() {
+  const t = state.type;
+  if (!t) return [];
+  if (stopped911()) {
+    return [item("c911", "Closing out", "Record in the case file that this was a 911 call from the same phone. No motion and no notice.")];
+  }
+  if (nightFormOnly()) {
+    return [
+      item("n1", "The moment it is signed", "Sergeant reviews the department blood form.", { due: "Before the draw" }),
+      item("n2", "Serving it", "Dispatch calls the phlebotomist to the station or to jail booking.", { due: "When the sergeant says to draw" }),
+      item("n3", "Serving it", "If the driver resists, the sergeant decides."),
+      item("n4", "Right after service", "Email the property sheet to the mag room before the end of the shift.", { due: "Before the end of the shift", doc: "property", fields: [
+        { key: "bloodGot", label: "Blood obtained (yes or no)" },
+        { key: "phlebotomist", label: "Who drew it" },
+        { key: "bloodTime", label: "Time" }
+      ] })
+    ];
+  }
+  const items = [];
+  const G1 = "The moment it is signed";
+  const G2 = "Before you serve";
+  const G3 = "Serving it";
+  const G4 = "Right after service";
+  const G5 = "When more comes in";
+  const G6 = "Closing out";
+  if (t === "ping") {
+    items.push(item("p-judge", G1, "Record the judge, the date, and the time.", { due: "When the judge signs", fields: [
+      { key: "judgeName", label: "Judge" }, { key: "signDate", label: "Date", type: "date" }, { key: "signTime", label: "Time", type: "time" }
+    ] }));
+    if (on("delay")) items.push(item("p-init", G1, "Check the judge's initials on the delay. Not initialed means not granted."));
+    items.push(item("p-fwd", G1, "Forward the signed order to the mag room.", { doc: "motion" }));
+    if (!on("delay")) items.push(item("p-notice", "Notice", "Give notice the same day, unless you did not get a delay.", { due: showDate(val("firstDate")), doc: "notice" }));
+    else items.push(item("p-notice", "Notice", "Do not give notice until the delay ends. The judge must have initialed it.", { due: showDate(delayEndFrom(val("firstDate"))), doc: "notice" }));
+    items.push(item("p-doj", "Notice", "If you still have no identified person, send the notice information to the California Department of Justice.", { due: val("firstDate") ? showDate(courtDaysAfter(val("firstDate"), 3)) : "Within three days" }));
+    items.push(item("p-destroy", G6, "Destroy the location data by the date on the review step unless the court ordered it kept.", { due: val("firstDate") ? showDate(addCal(val("firstDate"), 90)) : "" }));
+    items.push(item("p-file", G6, "Complete the case file: signed order, notice or delay, and the destruction note."));
+    return items;
+  }
+  items.push(item("c-judge", G1, "Record the judge, the date, and the time.", {
+    due: "When the judge signs",
+    fields: [
+      { key: "judgeName", label: "Judge" },
+      { key: "signDate", label: "Date", type: "date" },
+      { key: "signTime", label: "Time", type: "time" }
+    ]
+  }));
+  conditionLabels().forEach(function (label) {
+    if (label.indexOf("Seal until") === 0) return;
+    items.push(item("c-init-" + label, G1, "Check the judge's initials: " + label + ". Not initialed means not granted."));
+  });
+  items.push(item("c-fwd", G1, "Forward the signed pages to the mag room.", { doc: t === "pen" || t === "ramey" ? "combined" : "warrant" }));
+  if ((t === "place" && val("placeKind") !== "person") || t === "tracker") {
+    items.push(item("c-rissafe", G1, "Make the RISSafe (WSIN) entry."));
+  }
+  if (t === "records") {
+    items.push(item("c-mag", G2, "Open the mag room's reply. Record the custodian sheet and the dates.", {
+      due: "Before you serve",
+      doc: "warrant",
+      fields: [
+        { key: "custodianSent", label: "Custodian of records sheet sent? (yes or no)" },
+        { key: "magServeBy", label: "Their serve-by date", type: "date" },
+        { key: "magRecordsDue", label: "Their records-due date", type: "date" }
+      ]
+    }));
+  } else if (t === "place") {
+    items.push(item("c-print", G2, "Print the warrant and the receipt. Print the notice if phones are included and notice is not delayed. Do not print the affidavit to hand out.", { doc: "warrant", due: "Before you serve" }));
+  } else if (t === "blood") {
+    items.push(item("c-print", G2, "Print the warrant pages only. Do not bring the affidavit to hand out.", { doc: "warrant", due: "Before the draw" }));
+  } else if (t === "device") {
+    items.push(item("c-print", G2, "Print a warrant copy for the detectives. Do not bring the affidavit or the sealed attachment.", { doc: "warrant" }));
+  } else if (t === "tracker") {
+    items.push(item("c-day", G2, "Confirm the install is inside California and in the daytime unless night installation was initialed.", { due: showDate(executionDay(anchorIssue())) }));
+  } else if (t === "pen") {
+    items.push(item("c-carrier", G2, "Confirm how the carrier accepts the order. Do not tell the subscriber.", { doc: "combined" }));
+  } else if (t === "ramey") {
+    items.push(item("c-id", G2, "Confirm the person's description and the bail written on the warrant.", { doc: "combined" }));
+  }
+  if (t === "place") items.push(item("c-serve", G3, "Hand over the warrant and, if you take property, the receipt. Do not hand over the affidavit or the sealed attachment.", { due: "At service" }));
+  else if (t === "blood") items.push(item("c-serve", G3, "Show the warrant. Give the warrant pages only. The phlebotomist draws the blood.", { due: "At the draw" }));
+  else if (t === "records") items.push(item("c-serve", G3, "Serve the company by the portal or the way the company accepts service. Send the warrant. If the mag room sent a custodian sheet, send that too. Do not send the affidavit or the sealed attachment.", { due: showDate(earlierDate(post("magServeBy") && executionDay(anchorIssue()) && post("magServeBy") < executionDay(anchorIssue()) ? post("magServeBy") : executionDay(anchorIssue()))) }));
+  else if (t === "device") items.push(item("c-serve", G3, "Hand the detectives the phone and a copy of the warrant. That is service."));
+  else if (t === "tracker") items.push(item("c-serve", G3, "Install the tracker, or serve the company that holds the tracking data.", { due: showDate(executionDay(anchorIssue())) }));
+  else if (t === "pen") items.push(item("c-serve", G3, "Serve the order on the carrier. The order stays sealed."));
+  else if (t === "ramey") items.push(item("c-serve", G3, "Arrest. A felony arrest may be made at any hour."));
+  if (t === "blood") {
+    items.push(item("c-after", G4, "Sign the return and email it to the mag room with the property sheet, before the end of the shift.", {
+      due: "Before the end of the shift",
+      doc: "return",
+      fields: [
+        { key: "serveDate", label: "Date of the draw", type: "date" },
+        { key: "inventory", label: "What was taken (or nothing taken)" },
+        { key: "bloodGot", label: "Blood obtained" },
+        { key: "phlebotomist", label: "Who drew it" }
+      ]
+    }));
+  } else if (t === "records") {
+    items.push(item("c-after", G4, "Sign the return and email it to the mag room with the portal confirmation.", {
+      due: showDate(returnBy(anchorIssue())),
+      doc: "return",
+      fields: [
+        { key: "serveDate", label: "Date of service", type: "date" },
+        { key: "portalConfirm", label: "Portal confirmation" },
+        { key: "inventory", label: "What came back, or nothing yet" }
+      ]
+    }));
+  } else if (t === "ramey") {
+    items.push(item("c-after", G4, "Complete the certificate of service and email it to the mag room.", {
+      doc: "combined",
+      fields: [
+        { key: "serveDate", label: "Date of arrest", type: "date" },
+        { key: "serveTime", label: "Time of arrest" },
+        { key: "serveWhere", label: "Location of the arrest" },
+        { key: "jailWhere", label: "Where the person was booked" }
+      ]
+    }));
+  } else if (t === "pen") {
+    items.push(item("c-after", G4, "Note the date the carrier started the order in the case file.", { fields: [{ key: "serveDate", label: "Start date", type: "date" }] }));
+  } else if (t !== "ping") {
+    items.push(item("c-after", G4, "Book the evidence. Sign the return and email it to the mag room with the receipt. A return is required even when nothing is taken.", {
+      due: showDate(returnBy(anchorIssue())),
+      doc: "return",
+      fields: [
+        { key: "serveDate", label: "Date of service", type: "date" },
+        { key: "serveTime", label: "Time" },
+        { key: "serveWhere", label: "Place" },
+        { key: "inventory", label: "Property taken, or nothing taken" }
+      ]
+    }));
+  }
+  if (t === "records" || t === "device" || t === "place" || t === "blood" || t === "tracker") {
+    items.push(item("c-more", G5, "When more comes in, send the amended return to the mag room. If a custodian sheet came back signed, attach it.", {
+      doc: "amended",
+      fields: [{ key: "amendItems", label: "What arrived later" }, { key: "trackEnded", label: t === "tracker" ? "Date tracking ended" : "Leave blank if not a tracker", type: "date" }]
+    }));
+  } else if (t === "pen") {
+    items.push(item("c-more", G5, "File what the carrier sends with the case."));
+  }
+  if (needsNotice()) {
+    let due = "When the warrant is executed";
+    if (t === "tracker") {
+      const end = post("trackEnded") || (anchorIssue() ? addCal(anchorIssue(), 30) : "");
+      due = end ? showDate(addCal(end, 10)) : "10 calendar days after tracking ends";
+    } else if (t === "pen") {
+      const end = anchorIssue() ? addCal(anchorIssue(), 60) : "";
+      due = end ? showDate(addCal(end, 30)) : "30 days after the order ends";
+    } else if (on("delay")) due = showDate(delayEndFrom(anchorIssue()));
+    items.push(item("c-notice", G6, on("delay") ? "Serve the notice when the delay ends." : "Serve the notice.", { due: due, doc: "notice", fields: [{ key: "noticeTo", label: "Person to notify" }] }));
+  }
+  if (t === "place" || t === "blood" || t === "device" || t === "tracker") {
+    items.push(item("c-prop", G6, "Property is released only by a court order."));
+  }
+  items.push(item("c-file", G6, "Complete the case file."));
+  return items;
+}
+function nextAction() {
+  if (!state.type) return { text: "Pick a warrant type.", id: null };
+  const steps = stepsFor(state.type);
+  const step = steps[state.step] || steps[0];
+  if (step.id === "after") {
+    const items = checklist();
+    const n = items.find(function (it) { return !state.checks[it.id]; });
+    if (!n) return { text: "Done", id: null };
+    return { text: n.title, id: n.id };
+  }
+  if (step.id === "review") return { text: reviewNextText(), id: "review-next" };
+  const miss = missingOnStep(step.id);
+  if (miss.length) return { text: "Still needed: " + miss[0], id: null };
+  const nxt = steps[state.step + 1];
+  if (!nxt) return { text: "Review the packet.", id: null };
+  return { text: "Continue to " + nxt.label, id: null };
+}
+
+function canon(v) {
+  if (v === null || typeof v !== "object") return JSON.stringify(v);
+  if (Array.isArray(v)) return "[" + v.map(canon).join(",") + "]";
+  const keys = Object.keys(v).sort();
+  return "{" + keys.map(function (k) { return JSON.stringify(k) + ":" + canon(v[k]); }).join(",") + "}";
+}
+function fingerprint() {
+  const payload = {
+    template: TEMPLATE_VERSION,
+    type: state.type,
+    answers: state.answers,
+    exhibits: state.exhibits.map(function (e) { return { caption: e.caption || "", name: e.name || "", data: e.dataUrl || "" }; })
+  };
+  const str = canon(payload);
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, "0");
+}
+
+function xmlEsc(s) {
+  return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]; });
+}
+function paraXml(text) {
+  return "<w:p><w:r><w:t xml:space=\"preserve\">" + xmlEsc(text) + "</w:t></w:r></w:p>";
+}
+function imageXml(rid) {
+  const cx = "5486400";
+  const cy = "3200400";
+  return "<w:p><w:r><w:drawing><wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\"><wp:extent cx=\"" + cx + "\" cy=\"" + cy + "\"/><wp:docPr id=\"" + rid.replace(/\D/g, "") + "\" name=\"Exhibit\"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" noChangeAspect=\"1\"/></wp:cNvGraphicFramePr><a:graphic xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\"><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><pic:pic xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><pic:nvPicPr><pic:cNvPr id=\"0\" name=\"exhibit\"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed=\"" + rid + "\"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"" + cx + "\" cy=\"" + cy + "\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>";
+}
+function dataUrlBytes(dataUrl) {
+  const b64 = String(dataUrl).split(",")[1] || "";
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+function buildDocxZip(doc) {
+  if (!window.JSZip) return Promise.reject(new Error("JSZip missing"));
+  const zip = new JSZip();
+  const rels = [];
+  let body = "";
+  let imgN = 0;
+  doc.blocks.forEach(function (b) {
+    if (b.kind === "img" && /^data:image\/(png|jpeg);base64,/.test(b.src || "")) {
+      imgN += 1;
+      const ext = b.src.indexOf("image/png") >= 0 ? "png" : "jpeg";
+      const rid = "rIdImg" + imgN;
+      zip.file("word/media/image" + imgN + "." + ext, dataUrlBytes(b.src));
+      rels.push("<Relationship Id=\"" + rid + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"media/image" + imgN + "." + ext + "\"/>");
+      body += imageXml(rid);
+    } else if (b.kind === "rule") {
+      body += paraXml("");
+    } else {
+      body += paraXml((b.runs || []).map(function (r) { return r.text; }).join(""));
+    }
+  });
+  const documentXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+    "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><w:body>" +
+    body + "<w:sectPr><w:pgSz w:w=\"12240\" w:h=\"15840\"/><w:pgMar w:top=\"1440\" w:right=\"1440\" w:bottom=\"1440\" w:left=\"1440\"/></w:sectPr></w:body></w:document>";
+  zip.file("[Content_Types].xml", "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Default Extension=\"xml\" ContentType=\"application/xml\"/><Default Extension=\"png\" ContentType=\"image/png\"/><Default Extension=\"jpeg\" ContentType=\"image/jpeg\"/><Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/></Types>");
+  zip.file("_rels/.rels", "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"word/document.xml\"/></Relationships>");
+  zip.file("word/_rels/document.xml.rels", "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" + rels.join("") + "</Relationships>");
+  zip.file("word/document.xml", documentXml);
+  return zip;
+}
+function blobToB64(blob) {
+  return new Promise(function (resolve, reject) {
+    const r = new FileReader();
+    r.onload = function () { resolve(String(r.result).split(",")[1]); };
+    r.onerror = function () { reject(r.error); };
+    r.readAsDataURL(blob);
+  });
+}
+async function exportDoc(doc) {
+  try {
+    if (doc.id === "motion" && pingTemplateB64) {
+      const filled = await fillPingTemplate();
+      if (filled) return filled;
+    }
+  } catch (e) { /* fall through to the plain export */ }
+  const zip = buildDocxZip(doc);
+  return zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+async function fillPingTemplate() {
+  const bin = Uint8Array.from(atob(pingTemplateB64), function (c) { return c.charCodeAt(0); });
+  const zip = await JSZip.loadAsync(bin);
+  const file = zip.file("word/document.xml");
+  if (!file) throw new Error("no document");
+  let xml = await file.async("string");
+  const map = {
+    "{{OFFICER_NAME}}": val("officerName"),
+    "{{BADGE}}": val("badge"),
+    "{{CASE}}": val("caseNumber"),
+    "{{PHONE}}": val("phone"),
+    "{{CARRIER}}": val("carrier"),
+    "{{DANGER}}": val("danger"),
+    "{{WHY}}": val("whyNoWarrant"),
+    "{{SERGEANT}}": val("approveSgt"),
+    "{{REQUEST_DATE}}": val("requestDate"),
+    "{{REQUEST_TIME}}": val("requestTime"),
+    "{{FIRST_DATE}}": val("firstDate"),
+    "{{FIRST_TIME}}": val("firstTime"),
+    "{{FIRST_RESULT}}": val("firstResult"),
+    "{{FACTS}}": val("facts")
+  };
+  Object.keys(map).forEach(function (k) { xml = xml.split(k).join(xmlEsc(map[k])); });
+  zip.file("word/document.xml", xml);
+  return zip.generateAsync({ type: "blob" });
+}
+function downloadBlob(blob, name) {
+  const a = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+}
+
+const HELP = {
+  you: "Use the name and badge you will sign. This page does not save the warrant. Save profile keeps only your name, badge, years, assignment, and training on this browser.",
+  emergency: "State the danger of death or serious physical injury before you describe the phone. If a warrant could have been signed in time, this path does not work.",
+  request: "The sergeant approves. The communications center makes the request to the carrier. You are writing what already happened.",
+  results: "The three court days start when the first result is obtained, not when you asked.",
+  target: "One company per warrant. Describe a place so another officer could find it.",
+  seeking: "Name the items and the time period. Do not ask for a geofence.",
+  facts: "Write the probable cause in your own words. The page does not rewrite it. Add PNG or JPEG exhibits if you need them. They are not saved.",
+  conditions: "Each box you tick adds its clauses. The judge must initial it or it is not granted.",
+  review: "Read what is missing, the route, and the model-wording warning before you send anything.",
+  after: "Tick the steps in order. The outlined step and the line at the bottom are the same step."
+};
+function helpFor(stepId) { return HELP[stepId] || ""; }
+
+function fieldControl(f) {
+  const id = "f-" + f.key;
+  const v = state.answers[f.key] || "";
+  const extra = f.rerender ? " data-rerender=\"1\"" : "";
+  if (f.type === "check") {
+    return "<label class=\"check\"><input type=\"checkbox\" id=\"" + id + "\" data-a=\"" + esc(f.key) + "\"" + extra + (v === "yes" ? " checked" : "") + "> " + esc(f.label) + "</label>";
+  }
+  if (f.type === "radio") {
+    return "<div class=\"field\"><span>" + esc(f.label) + "</span>" + f.options.map(function (o) {
+      return "<label class=\"check\"><input type=\"radio\" name=\"" + esc(f.key) + "\" data-a=\"" + esc(f.key) + "\" value=\"" + esc(o.value) + "\"" + extra + (v === o.value ? " checked" : "") + "> " + esc(o.label) + "</label>";
+    }).join("") + "</div>";
+  }
+  let control;
+  if (f.type === "textarea") control = "<textarea id=\"" + id + "\" data-a=\"" + esc(f.key) + "\"" + extra + ">" + esc(v) + "</textarea>";
+  else if (f.type === "select") {
+    control = "<select id=\"" + id + "\" data-a=\"" + esc(f.key) + "\"" + extra + ">" + f.options.map(function (o) {
+      return "<option value=\"" + esc(o.value) + "\"" + (v === o.value ? " selected" : "") + ">" + esc(o.label) + "</option>";
+    }).join("") + "</select>";
+  } else {
+    const inputType = f.type === "date" || f.type === "time" ? f.type : "text";
+    control = "<input id=\"" + id + "\" data-a=\"" + esc(f.key) + "\" type=\"" + inputType + "\" value=\"" + esc(v) + "\"" + extra + ">";
+  }
+  return "<div class=\"field\"><label for=\"" + id + "\">" + esc(f.label) + "</label>" + control + "</div>";
+}
+function checklistHtml() {
+  const items = checklist();
+  const next = items.find(function (it) { return !state.checks[it.id]; });
+  let html = "";
+  let group = "";
+  items.forEach(function (it) {
+    if (it.group !== group) {
+      group = it.group;
+      html += "<h3 class=\"check-group\">" + esc(group) + "</h3>";
+    }
+    const outlined = next && next.id === it.id ? " outlined" : "";
+    html += "<li class=\"check-item" + outlined + "\" data-cid=\"" + esc(it.id) + "\">";
+    html += "<label class=\"check\"><input type=\"checkbox\" data-check=\"" + esc(it.id) + "\"" + (state.checks[it.id] ? " checked" : "") + "><span class=\"ctitle\">" + esc(it.title) + "</span></label>";
+    if (it.detail) html += "<p class=\"detail\">" + esc(it.detail) + "</p>";
+    if (it.due) html += "<p class=\"due\">Due: " + esc(it.due) + "</p>";
+    if (it.doc) html += "<button type=\"button\" class=\"ghost mini\" data-open=\"" + esc(it.doc) + "\">Open the document</button>";
+    it.fields.forEach(function (field) {
+      const pv = state.post[field.key] || "";
+      const inputType = field.type === "date" || field.type === "time" ? field.type : "text";
+      html += "<label class=\"detail\">" + esc(field.label) + "<input class=\"mini\" data-post=\"" + esc(field.key) + "\" type=\"" + inputType + "\" value=\"" + esc(pv) + "\"></label>";
+    });
+    html += "</li>";
+  });
+  return "<ol class=\"checks\" id=\"checks\">" + html + "</ol>";
+}
+function runsHtml(runs) {
+  return (runs || []).map(function (r) {
+    const gap = r.gap ? " data-gap=\"" + esc(r.gap) + "\"" : "";
+    return "<span class=\"run " + esc(r.origin) + "\" title=\"" + esc(r.id) + "\"" + gap + ">" + esc(r.text) + "</span>";
+  }).join("");
+}
+function paperHtml(doc) {
+  return doc.blocks.map(function (b) {
+    if (b.kind === "h") return "<h2>" + runsHtml(b.runs) + "</h2>";
+    if (b.kind === "center") return "<p class=\"court\">" + runsHtml(b.runs) + "</p>";
+    if (b.kind === "rule") return "<hr class=\"hair\">";
+    if (b.kind === "img") {
+      if (!/^data:image\/(png|jpeg);base64,/.test(b.src || "")) return "";
+      return "<img class=\"exhibit\" alt=\"Exhibit\" src=\"" + b.src + "\">";
+    }
+    return "<p>" + runsHtml(b.runs) + "</p>";
+  }).join("");
+}
+function reviewHtml() {
+  const missing = allMissing();
+  const gaps = gapsInPacket();
+  const conds = conditionLabels();
+  let html = "<h2>Review</h2>";
+  html += "<div class=\"warn\"><strong>Model wording. Not Marin County language.</strong><p>Marin has not supplied its templates. Nothing on this page is Marin’s form. Clauses in this packet that are still unmatched:</p><ul>" +
+    (gaps.length ? gaps.map(function (g) { return "<li>" + esc(g) + "</li>"; }).join("") : "<li>None of that set are in this packet. The packet is still model wording.</li>") +
+    "</ul></div>";
+  html += "<h3>Still missing</h3>" + (missing.length ? "<ul class=\"miss\">" + missing.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join("") + "</ul>" : "<p>Nothing required is blank.</p>");
+  html += "<h3>Conditions on this warrant</h3>" + (conds.length ? "<ul>" + conds.map(function (c) { return "<li>" + esc(c) + " — requested. Not granted until the judge initials it.</li>"; }).join("") + "</ul>" : "<p>No special condition is ticked.</p>");
+  html += "<h3>Dates</h3><ul>" + dateRows().map(function (r) { return "<li><strong>" + esc(r.label) + ".</strong> " + esc(r.value) + "</li>"; }).join("") + "</ul>";
+  html += "<h3>Reminders</h3><ul>" + reminders().map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>";
+  html += "<h3>What happens next</h3><ol>" + routeLines().map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ol>";
+  html += "<h3>Who to email</h3><ul>" + emailCards().map(function (c) { return "<li><strong>" + esc(c.who) + ".</strong> " + esc(c.how) + "</li>"; }).join("") + "</ul>";
+  html += "<p><strong>Fingerprint " + esc(fingerprint()) + "</strong> · template " + esc(TEMPLATE_VERSION) + "</p>";
+  html += "<p class=\"detail\">The fingerprint covers the drafting answers and the exhibits. Steps you take after signing do not change it.</p>";
+  return html;
+}
+function formNotices() {
+  let html = "";
+  const step = stepsFor(state.type)[state.step];
+  if (!step) return "";
+  if (step.id === "emergency") {
+    html += "<div class=\"warn\"><strong>People v. Andrade (Oct. 20, 2026) H052967.</strong> The emergency route fails where a warrant could have been obtained in time. State the danger of death or serious physical injury before anything else.</div>";
+  }
+  if (step.id === "results") {
+    html += "<div class=\"warn\">The motion is due three court days after the first result, not after the request. Penal Code 1546.1(h).</div>";
+  }
+  if (stopped911() && step.id !== "you" && step.id !== "emergency") {
+    html += "<div class=\"warn\"><strong>No motion and no notice.</strong> This was a 911 call from the same phone. Penal Code 1546.1(h) and 1546.2(a)(2).</div>";
+  }
+  if (nightFormOnly() && (step.id === "seeking" || step.id === "facts" || step.id === "conditions")) {
+    html += "<div class=\"warn\">Use the pre-approved form on the department shared drive. This page does not replace that form. Tick major collision below if the communications center must call the deputy DA to the scene.</div>";
+  }
+  if (geofenceHit() && (step.id === "seeking" || step.id === "facts" || step.id === "review")) {
+    html += "<div class=\"warn\">This page will not draft a geofence warrant. Location-history dumps of that kind are not offered here.</div>";
+  }
+  if (state.type === "records" && step.id === "target") {
+    html += "<div class=\"warn\">One warrant per company.</div>";
+  }
+  if (step.id === "conditions" && state.type === "ramey") {
+    html += "<p>Night service under Penal Code 1533 is for search warrants. A felony arrest may be made at any hour under Penal Code 840.</p>";
+  }
+  return html;
+}
+function renderForm() {
+  const host = document.getElementById("formBody");
+  if (!host) return;
+  const steps = stepsFor(state.type);
+  const step = steps[state.step];
+  let html = "<ol class=\"chips\">" + steps.map(function (s, i) {
+    return "<li><button type=\"button\" data-step=\"" + i + "\" class=\"" + (i === state.step ? "on" : "") + "\">" + esc(s.label) + "</button></li>";
+  }).join("") + "</ol>";
+  html += "<details class=\"how\"><summary>How to answer</summary><p>" + esc(helpFor(step.id)) + "</p></details>";
+  html += formNotices();
+  if (step.id === "you") {
+    html += "<div class=\"row-actions\"><button type=\"button\" class=\"ghost\" id=\"btnProfileLoad\">Use saved profile</button><button type=\"button\" class=\"ghost\" id=\"btnProfileSave\">Save profile</button><button type=\"button\" class=\"ghost\" id=\"btnSample\">Load a training sample (invented)</button></div>";
+  }
+  if (step.id === "review") html += reviewHtml();
+  else if (step.id === "after") html += checklistHtml();
+  else {
+    fieldsFor(step.id).forEach(function (f) { if (fieldShow(f)) html += fieldControl(f); });
+    if (step.id === "facts" && buildingPacket()) html += exhibitHtml();
+  }
+  html += "<div class=\"row-actions\">";
+  if (state.step > 0) html += "<button type=\"button\" class=\"ghost\" id=\"btnBack\">Back</button>";
+  if (step.id !== "after") html += "<button type=\"button\" class=\"primary\" id=\"btnNext\">Continue</button>";
+  html += "</div>";
+  host.innerHTML = html;
+}
+function exhibitHtml() {
+  let html = "<div class=\"field\"><label for=\"exhibitFile\">Exhibits (PNG or JPEG)</label><input id=\"exhibitFile\" type=\"file\" accept=\"image/png,image/jpeg\" multiple></div>";
+  state.exhibits.forEach(function (ex, i) {
+    const letter = String.fromCharCode(65 + i);
+    html += "<div class=\"field\"><label>Exhibit " + letter + " caption<input data-ex=\"" + i + "\" type=\"text\" value=\"" + esc(ex.caption || "") + "\"></label><button type=\"button\" class=\"ghost\" data-ex-del=\"" + i + "\">Remove</button></div>";
+  });
+  return html;
+}
+function renderDoc() {
+  const docs = documents();
+  const tabs = document.getElementById("docTabs");
+  const paper = document.getElementById("paper");
+  const flag = document.getElementById("modelFlag");
+  if (!tabs || !paper) return;
+  if (!docs.length) {
+    tabs.innerHTML = "";
+    paper.innerHTML = "<p>Pick a warrant type. The document builds here.</p>";
+    return;
+  }
+  if (!docs.some(function (d) { return d.id === state.docTab; })) state.docTab = docs[0].id;
+  const doc = docs.find(function (d) { return d.id === state.docTab; }) || docs[0];
+  tabs.innerHTML = docs.map(function (d) {
+    return "<button type=\"button\" data-doc=\"" + esc(d.id) + "\" class=\"" + (d.id === doc.id ? "on" : "") + "\">" + esc(d.title) + "</button>";
+  }).join("");
+  paper.innerHTML = paperHtml(doc);
+  if (flag) {
+    let note = "Model wording. Not a Marin County form.";
+    if (state.type === "ping" && !stopped911()) note += " The Marin motion file was not attached, so Word export is a plain document, not the pleading-paper original.";
+    flag.textContent = note;
+  }
+  const legend = document.getElementById("legend");
+  if (legend) legend.hidden = !state.sources;
+}
+function renderStrip() {
+  const el = document.getElementById("stripText");
+  if (el) el.textContent = nextAction().text;
+}
+function render() {
+  const app = document.getElementById("app");
+  if (!state.type) {
+    app.innerHTML = homeHtml();
+    renderStrip();
+    return;
+  }
+  app.innerHTML = "<div class=\"layout\"><section class=\"panel pane-form\"><p><button type=\"button\" class=\"ghost\" id=\"btnTypes\">All types</button> <strong id=\"typeName\"></strong></p><div id=\"formBody\"></div></section><section class=\"panel pane-doc\"><div class=\"doc-chrome\"><p class=\"model-flag\" id=\"modelFlag\"></p><label class=\"check\"><input type=\"checkbox\" id=\"sources\"" + (state.sources ? " checked" : "") + "> Sources</label><div class=\"tabs\" id=\"docTabs\"></div><div class=\"export-bar\"><button type=\"button\" id=\"exportOne\">Download .docx</button><button type=\"button\" id=\"exportAll\">All (zip)</button></div><p id=\"exportMsg\" class=\"detail\"></p></div><p class=\"legend\" id=\"legend\" hidden>Brass shading is a fixed clause. Green shading is your words.</p><article class=\"paper\" id=\"paper\"></article></section></div>";
+  document.getElementById("typeName").textContent = typeTitle(state.type);
+  renderForm();
+  renderDoc();
+  renderStrip();
+  document.body.classList.toggle("show-doc", state.showDoc);
+}
+function typeTitle(t) {
+  return ({
+    ping: "Emergency phone ping",
+    place: "Home, building, car, or person",
+    blood: "DUI blood draw",
+    records: "Account records from a company",
+    device: "Phone or device already in custody",
+    tracker: "GPS tracker",
+    pen: "Pen register / trap and trace",
+    ramey: "Arrest warrant before charges"
+  })[t] || "";
+}
+function homeHtml() {
+  const tiles = [
+    ["ping", "Emergency phone ping", "Motion after the ping"],
+    ["place", "Home, building, car, or person", "Search warrant and affidavit"],
+    ["blood", "DUI blood draw", "Warrant, or the night form"],
+    ["records", "Account records from a company", "One company per warrant"],
+    ["device", "A phone or device already in custody", "Search of a seized device"],
+    ["tracker", "GPS tracker", "Install or company data"],
+    ["pen", "Pen register / trap and trace", "One combined order"],
+    ["ramey", "Arrest warrant before charges", "Penal Code 817"]
+  ];
+  return "<div class=\"type-grid\">" + tiles.map(function (t) {
+    return "<button type=\"button\" class=\"type-tile\" data-type=\"" + t[0] + "\">" + esc(t[1]) + "<span>" + esc(t[2]) + "</span></button>";
+  }).join("") + "</div><p><button type=\"button\" class=\"ai-line\" id=\"aiToggle\">No artificial intelligence.</button></p><div id=\"aiExplain\" class=\"ai-explain\" hidden></div>";
+}
+function aiExplainHtml() {
+  return "Penal Code 13663, enacted by SB 524, requires a disclosure when artificial intelligence drafts an official police report of the kinds the statute names. This page does not use artificial intelligence. Every sentence is a fixed clause with an ID, or words you typed. The same answers always make the same text. The fingerprint on Review is an FNV-1a hash of those drafting answers and template " + TEMPLATE_VERSION + ". Nothing is stored except a profile you choose to save.";
+}
+
+function snapshot() {
+  return JSON.stringify({ step: state.step, answers: state.answers, post: state.post, checks: state.checks, exhibits: state.exhibits, docTab: state.docTab });
+}
+function restore(raw) {
+  const data = JSON.parse(raw);
+  state.step = data.step || 0;
+  state.answers = data.answers || {};
+  state.post = data.post || {};
+  state.checks = data.checks || {};
+  state.exhibits = data.exhibits || [];
+  state.docTab = data.docTab || null;
+}
+function selectType(type) {
+  if (state.type) stash[state.type] = snapshot();
+  state.type = type;
+  if (stash[type]) restore(stash[type]);
+  else {
+    const keep = {};
+    PROFILE_KEYS.forEach(function (k) { if (state.answers[k]) keep[k] = state.answers[k]; });
+    state.answers = keep;
+    state.post = {};
+    state.checks = {};
+    state.exhibits = [];
+    state.step = 0;
+    state.docTab = null;
+    if (type === "records") {
+      state.answers.portal = "yes";
+      state.answers.fiveDay = "yes";
+    }
+  }
+  loadProfileIntoEmpty();
+  render();
+}
+function loadProfileIntoEmpty() {
+  try {
+    const raw = localStorage.getItem("mvpd-wb-profile");
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    PROFILE_KEYS.forEach(function (k) {
+      if (!state.answers[k] && p && typeof p[k] === "string") state.answers[k] = p[k];
+    });
+  } catch (e) { /* ignore */ }
+}
+function saveProfile() {
+  try {
+    const p = {};
+    PROFILE_KEYS.forEach(function (k) { p[k] = state.answers[k] || ""; });
+    localStorage.setItem("mvpd-wb-profile", JSON.stringify(p));
+  } catch (e) { /* ignore */ }
+}
+function readProfile() {
+  try {
+    const raw = localStorage.getItem("mvpd-wb-profile");
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    PROFILE_KEYS.forEach(function (k) { if (p && typeof p[k] === "string") state.answers[k] = p[k]; });
+  } catch (e) { /* ignore */ }
+}
+
+const SAMPLES = {
+  place: {
+    officerName: "Jordan Hale", badge: "214", years: "6", assignment: "Investigations", training: "POST search warrant course, 2024",
+    caseNumber: "TRN-0000", crimeType: "Property", issueDate: "2026-11-02",
+    placeKind: "home", address: "100 Sample Lane, Mill Valley, CA", offense: "felony burglary", ground: "a4",
+    items: "a blue backpack and a laptop computer", phones: "yes", phoneDesc: "a black phone in a gray case",
+    phoneWindow: "November 1, 2026 through November 2, 2026", phoneData: "photographs and messages in that window",
+    facts: "Training sample only. Invented. On November 2, 2026, a witness pointed out 100 Sample Lane.",
+    night: "yes", nightCause: "The occupant works nights and is expected home after 10 p.m.",
+    delay: "yes", delayReason: "Flight from prosecution", seal: "yes", hobbs: "yes",
+    hobbsFacts: "SOURCE NAME SAMPLE QUINN told me the backpack was inside.",
+    unlock: "yes", unlockPerson: "Alex Rivera"
+  },
+  blood: {
+    officerName: "Jordan Hale", badge: "214", years: "6", assignment: "Patrol", training: "DUI school",
+    caseNumber: "TRN-0000", crimeType: "DUI", issueDate: "2026-11-02",
+    driverName: "Alex Rivera", driverDob: "January 1, 1990", driverWhere: "station", nightForm: "no",
+    bloodStatus: "refused", offense: "Vehicle Code 23152",
+    facts: "Training sample only. Invented. The driver refused a blood test after being arrested for driving under the influence."
+  },
+  bloodnight: {
+    officerName: "Jordan Hale", badge: "214", caseNumber: "TRN-0000", crimeType: "DUI",
+    driverName: "Alex Rivera", driverWhere: "jail", nightForm: "yes", major: "no"
+  },
+  records: {
+    officerName: "Jordan Hale", badge: "214", years: "6", assignment: "Investigations", training: "POST search warrant course, 2024",
+    caseNumber: "TRN-0000", crimeType: "Fraud", issueDate: "2026-11-02",
+    company: "Example Cloud LLC", accountId: "user sample.rivera@example.com", outOfState: "yes",
+    offense: "felony fraud", recWindow: "October 1, 2026 through November 2, 2026",
+    recSubscriber: "yes", recLogs: "yes", portal: "yes", fiveDay: "yes",
+    facts: "Training sample only. Invented. The account was used to send the fraudulent invoice."
+  },
+  device: {
+    officerName: "Jordan Hale", badge: "214", caseNumber: "TRN-0000", crimeType: "Property", issueDate: "2026-11-02",
+    deviceDesc: "a black phone, training sample", deviceWhere: "Mill Valley PD evidence", deviceHow: "booked after arrest",
+    offense: "felony burglary", phoneWindow: "November 1 through November 2, 2026", phoneData: "photographs",
+    facts: "Training sample only. Invented. The phone was booked with the prisoner property.",
+    unlock: "yes", unlockPerson: "Alex Rivera"
+  },
+  tracker: {
+    officerName: "Jordan Hale", badge: "214", caseNumber: "TRN-0000", crimeType: "Property", issueDate: "2026-11-02",
+    trackWhat: "a white sedan, plate 7SAM123", trackWhere: "public street in Mill Valley", offense: "felony vehicle theft",
+    trackDays: "30", facts: "Training sample only. Invented. The sedan is used to move stolen property.",
+    portal: "no", fiveDay: "no"
+  },
+  pen: {
+    officerName: "Jordan Hale", badge: "214", caseNumber: "TRN-0000", crimeType: "Fraud", issueDate: "2026-11-02",
+    phone: "415-555-0148", subscriber: "Alex Rivera", carrier: "Example Wireless", penTarget: "Alex Rivera",
+    offense: "felony fraud", penKind: "both",
+    facts: "Training sample only. Invented. The number is used to arrange the fraudulent sales."
+  },
+  ramey: {
+    officerName: "Jordan Hale", badge: "214", caseNumber: "TRN-0000", crimeType: "Persons", issueDate: "2026-11-02",
+    personName: "Alex Rivera", personDesc: "about 30 years old, training description only",
+    offense: "felony robbery", bail: "50000",
+    facts: "Training sample only. Invented. A witness identified Alex Rivera as the person who took the bag."
+  },
+  ping: {
+    officerName: "Jordan Hale", badge: "214", years: "6", assignment: "Patrol", training: "exigent ping class",
+    caseNumber: "TRN-0000", same911: "no",
+    danger: "Training sample only. A hiker is overdue and the weather is below freezing. There is a danger of death.",
+    whyNoWarrant: "The magistrate could not be reached before nightfall and the hiker's location was needed without that delay.",
+    phone: "415-555-0148", carrier: "Example Wireless", approveSgt: "Sergeant Training Sample",
+    requestDate: "2026-11-20", requestTime: "22:40", requestWhat: "current location of the handset",
+    firstDate: "2026-11-20", firstTime: "23:00", firstResult: "A point in Marin County, training coordinates only.",
+    facts: "Training sample only. Invented. The search team needed the handset location."
+  },
+  ping911: {
+    officerName: "Jordan Hale", badge: "214", caseNumber: "TRN-0000", same911: "yes",
+    phone: "415-555-0148"
+  }
+};
+function loadSample(name) {
+  const sample = SAMPLES[name] || SAMPLES.place;
+  const type = SAMPLES[name] ? (name === "bloodnight" ? "blood" : name === "ping911" ? "ping" : name) : name;
+  state.type = type;
+  state.answers = Object.assign({}, sample);
+  state.post = {};
+  state.checks = {};
+  state.exhibits = [];
+  state.step = 0;
+  state.docTab = null;
+  stash[type] = snapshot();
+  render();
+}
+
+function applyField(t) {
+  if (t.dataset.a) {
+    if (t.type === "checkbox") state.answers[t.dataset.a] = t.checked ? "yes" : "no";
+    else if (t.type === "radio") { if (t.checked) state.answers[t.dataset.a] = t.value; }
+    else state.answers[t.dataset.a] = t.value;
+  }
+  if (t.dataset.post) state.post[t.dataset.post] = t.value;
+  if (t.dataset.check) state.checks[t.dataset.check] = t.checked;
+  if (t.dataset.ex != null) {
+    const ex = state.exhibits[Number(t.dataset.ex)];
+    if (ex) ex.caption = t.value;
+  }
+}
+function onFormEvent(e) {
+  const t = e.target;
+  if (t.id === "sources") {
+    state.sources = t.checked;
+    document.body.classList.toggle("sources-on", state.sources);
+    renderDoc();
+    return;
+  }
+  if (t.dataset.step != null) {
+    state.step = Number(t.dataset.step);
+    render();
+    return;
+  }
+  if (t.dataset.doc) {
+    state.docTab = t.dataset.doc;
+    renderDoc();
+    return;
+  }
+  if (t.dataset.open) {
+    state.docTab = t.dataset.open;
+    state.showDoc = true;
+    document.body.classList.add("show-doc");
+    const btn = document.getElementById("btnPane");
+    if (btn) btn.textContent = "Show questions";
+    renderDoc();
+    return;
+  }
+  if (t.dataset.exDel != null) {
+    state.exhibits.splice(Number(t.dataset.exDel), 1);
+    render();
+    return;
+  }
+  applyField(t);
+  const structural = t.dataset.rerender || t.dataset.check || t.dataset.post;
+  if (t.dataset.rerender) renderForm();
+  else if (t.dataset.check) {
+    const nextItem = checklist().find(function (it) { return !state.checks[it.id]; });
+    document.querySelectorAll(".check-item").forEach(function (el) {
+      el.classList.toggle("outlined", !!(nextItem && el.dataset.cid === nextItem.id));
+    });
+  }
+  if (structural || t.dataset.a || t.dataset.ex != null || t.dataset.post) {
+    renderDoc();
+    renderStrip();
+  }
+}
+async function onExhibitFiles(input) {
+  const files = Array.prototype.slice.call(input.files || []);
+  for (const file of files) {
+    if (state.exhibits.length >= 8) break;
+    if (!/^image\/(png|jpeg)$/.test(file.type)) continue;
+    if (file.size > 4 * 1024 * 1024) continue;
+    const dataUrl = await readFile(file);
+    if (!/^data:image\/(png|jpeg);base64,/.test(dataUrl)) continue;
+    state.exhibits.push({ name: file.name, caption: "", dataUrl: dataUrl });
+  }
+  input.value = "";
+  render();
+}
+function readFile(file) {
+  return new Promise(function (resolve, reject) {
+    const r = new FileReader();
+    r.onload = function () { resolve(String(r.result)); };
+    r.onerror = function () { reject(r.error); };
+    r.readAsDataURL(file);
+  });
+}
+async function doExport(which) {
+  const msg = document.getElementById("exportMsg");
+  try {
+    const docs = documents();
+    if (!docs.length) return;
+    if (which === "one") {
+      const doc = docs.find(function (d) { return d.id === state.docTab; }) || docs[0];
+      const blob = await exportDoc(doc);
+      downloadBlob(blob, doc.filename);
+    } else {
+      const zip = new JSZip();
+      for (const doc of docs) {
+        const blob = await exportDoc(doc);
+        zip.file(doc.filename, blob);
+      }
+      const blob = await zip.generateAsync({ type: "blob" });
+      downloadBlob(blob, "All.zip");
+    }
+    if (msg) msg.textContent = "Download started.";
+  } catch (e) {
+    if (msg) msg.textContent = "Word export did not complete.";
+  }
+}
+function lookupHtml() {
+  const rows = Object.keys(HOLIDAYS).sort().map(function (k) {
+    return "<tr><td>" + esc(longDate(k)) + "</td><td>" + esc(HOLIDAYS[k]) + "</td></tr>";
+  }).join("");
+  return "<h2 id=\"overlayTitle\">Look up</h2>" +
+    "<h3>Glossary</h3><ul>" +
+    "<li><strong>Mag room.</strong> DA staff at the courthouse, da_magroom@marincounty.gov. They process and file warrants.</li>" +
+    "<li><strong>CalECPA.</strong> Penal Code 1546 and following. Rules for electronic information.</li>" +
+    "<li><strong>Hobbs attachment.</strong> A sealed page of confidential facts. It is never served and never left behind.</li>" +
+    "<li><strong>Ramey warrant.</strong> An arrest warrant before the complaint, Penal Code 817.</li>" +
+    "<li><strong>RISSafe.</strong> The WSIN deconfliction entry detectives make for a place, a car, or a tracker.</li>" +
+    "<li><strong>Pen register.</strong> Outgoing numbers. Trap and trace: incoming numbers. Not the contents, and not a location ping.</li>" +
+    "</ul><h3>Statutes this page is using</h3><ul>" +
+    "<li>Penal Code 13663 (SB 524): disclosure when defined AI systems draft a police report.</li>" +
+    "<li>Penal Code 1526(b) oral affidavit. Penal Code 1526(c) electronic signature and email.</li>" +
+    "<li>Penal Code 1524.3(g): preservation, 90 days, one renewal.</li>" +
+    "<li>Penal Code 1524(a)(12): tracking-device ground, including a Fish and Game or Public Resources misdemeanor when the information is tracking data. Operative text as of January 1, 2026.</li>" +
+    "<li>Penal Code 1524(a)(13): DUI blood after a refusal or an incomplete test under Vehicle Code 23612.</li>" +
+    "<li>Penal Code 1524(a)(19): event data recorder when a vehicle offense causes death or serious bodily injury.</li>" +
+    "<li>Penal Code 1533: night service of a search warrant, otherwise 7 a.m. to 10 p.m.</li>" +
+    "<li>Penal Code 1534(a) and People v. Clayton (1993) 18 Cal.App.4th 440: 10 days, issue date not counted.</li>" +
+    "<li>Penal Code 1534(b): tracker installed within 10 days, used no more than 30 days from issuance, daytime 6 a.m. to 10 p.m., return and notice 10 calendar days after use ends.</li>" +
+    "<li>Penal Code 1524.2: five business days for a covered foreign corporation.</li>" +
+    "<li>Penal Code 1546.1(d), 1546.1(h), 1546.2: particularity, emergency motion, notice.</li>" +
+    "<li>Penal Code 638.52 and 638.54: pen register, 60 days, notice 30 days after it ends.</li>" +
+    "<li>Penal Code 817 and 840: pre-complaint arrest warrant; felony arrest any hour.</li>" +
+    "<li>People v. Andrade (Oct. 20, 2026) H052967. Chatrie v. United States (June 29, 2026) 609 U.S. 605.</li>" +
+    "</ul><h3>What if</h3><ul>" +
+    "<li><strong>The judge does not initial a condition.</strong> It was not granted.</li>" +
+    "<li><strong>Nothing is taken.</strong> You still do the return.</li>" +
+    "<li><strong>Day 10 is a weekend or a court holiday.</strong> You may execute through that calendar day. File the return by the last court day before it.</li>" +
+    "<li><strong>The ping answered a 911 call from that same phone.</strong> No motion and no notice.</li>" +
+    "<li><strong>I want a geofence warrant.</strong> This page will not draft one.</li>" +
+    "<li><strong>The company is out of state.</strong> Penal Code 1524.2’s five business days apply to a foreign corporation qualified in California that serves the public. The mag room date controls once you enter it.</li>" +
+    "<li><strong>Night DUI blood on the department form.</strong> Sergeant only. Dispatch calls the phlebotomist. If the driver resists, the sergeant decides.</li>" +
+    "</ul><h3>Court holidays on this page</h3><p>Taken from the Judicial Council list for 2026 and 2027. Farmworkers Day in 2027 is April 9 on that list, not March 31. Dates outside this table are marked.</p><table><tbody>" + rows + "</tbody></table>" +
+    "<h3>Check before you rely</h3><ul>" +
+    "<li>CLEW is not named in Penal Code 1546.2. The statute says Department of Justice.</li>" +
+    "<li>The 90-day destruction date for a ping is this page’s practice. It is not Penal Code 1546.1(h). Rejection of the motion requires immediate destruction.</li>" +
+    "<li>Penal Code 1524.2 does not define business day. This page skips weekends and the holidays in the table.</li>" +
+    "<li>Tracking time runs from issuance, not from installation. Penal Code 1534(b)(1).</li>" +
+    "<li>Emergency notice under Penal Code 1546.2(a)(1) may be given within three court days. This page’s working date is the same day.</li>" +
+    "<li>Code of Civil Procedure 12a can move a court filing that lands on a holiday to the next court day. This page tells you to return by the last court day before, which is earlier.</li>" +
+    "<li>The Marin motion file, the patch, the deputy DA list, and Marin’s own templates were not in this copy.</li>" +
+    "</ul>";
+}
+function learnHtml() {
+  return "<h2 id=\"overlayTitle\">Learn</h2>" +
+    "<p>You answer on the left. The documents on the right are fixed clauses plus your words. Turn on Sources to see which is which.</p>" +
+    "<p>Search warrants and affidavits are separate documents. Each is headed Superior Court of California, County of Marin. A pen register and a Ramey warrant are one combined document each.</p>" +
+    "<p>The sergeant reviews first. You email the deputy DA who handles that crime type. The DA copies the mag room. You sign, call the communications center for the on-call judge, and email the packet where the judge says. You forward the signed pages to the mag room. You sign the return. No judge signs the return.</p>" +
+    "<p>An emergency ping does not go through the DA. It goes to the on-call judge, and the signed order then goes to the mag room. The motion is due three court days after the first result.</p>" +
+    "<p>The mark in the header is a stand-in. The department patch file was not attached.</p>" +
+    "<p>This page is not a CJIS system. A refresh clears the warrant. Only Save profile writes anything, and only the five profile fields.</p>";
+}
+
+document.body.addEventListener("click", function (e) {
+  const t = e.target.closest("button, label");
+  if (!t) return;
+  if (t.id === "btnCopy" || (t.closest && t.closest("#btnCopy"))) {
+    const btn = document.getElementById("btnCopy");
+    const done = function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy mag room address"; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(MAG_ROOM).then(done).catch(function () { done(); });
+    } else done();
+    return;
+  }
+  if (t.id === "aiToggle") {
+    const box = document.getElementById("aiExplain");
+    if (!box) return;
+    box.hidden = !box.hidden;
+    if (!box.hidden) box.textContent = aiExplainHtml();
+    return;
+  }
+  if (t.dataset && t.dataset.type) { selectType(t.dataset.type); return; }
+  if (t.id === "btnTypes") {
+    if (state.type) stash[state.type] = snapshot();
+    state.type = null;
+    render();
+    return;
+  }
+  if (t.id === "btnNext") {
+    const steps = stepsFor(state.type);
+    if (state.step < steps.length - 1) state.step += 1;
+    render();
+    return;
+  }
+  if (t.id === "btnBack") {
+    if (state.step > 0) state.step -= 1;
+    render();
+    return;
+  }
+  if (t.id === "btnSample") { loadSample(state.type || "place"); return; }
+  if (t.id === "btnProfileSave") { saveProfile(); return; }
+  if (t.id === "btnProfileLoad") { readProfile(); render(); return; }
+  if (t.id === "exportOne") { doExport("one"); return; }
+  if (t.id === "exportAll") { doExport("all"); return; }
+  if (t.id === "btnTheme") {
+    document.body.classList.toggle("dark");
+    t.textContent = document.body.classList.contains("dark") ? "Light theme" : "Dark theme";
+    return;
+  }
+  if (t.id === "btnPane") {
+    state.showDoc = !state.showDoc;
+    document.body.classList.toggle("show-doc", state.showDoc);
+    t.textContent = state.showDoc ? "Show questions" : "Show document";
+    return;
+  }
+  if (t.id === "btnLookup" || t.id === "btnLearn") {
+    document.getElementById("overlayBody").innerHTML = t.id === "btnLookup" ? lookupHtml() : learnHtml();
+    document.getElementById("overlay").hidden = false;
+    return;
+  }
+  if (t.id === "overlayClose") { document.getElementById("overlay").hidden = true; return; }
+  if (t.dataset && t.dataset.step != null) {
+    state.step = Number(t.dataset.step);
+    render();
+    return;
+  }
+  if (t.dataset && t.dataset.doc) {
+    state.docTab = t.dataset.doc;
+    renderDoc();
+    return;
+  }
+  if (t.dataset && t.dataset.open) {
+    state.docTab = t.dataset.open;
+    state.showDoc = true;
+    document.body.classList.add("show-doc");
+    const paneBtn = document.getElementById("btnPane");
+    if (paneBtn) paneBtn.textContent = "Show questions";
+    renderDoc();
+    return;
+  }
+  if (t.dataset && t.dataset.exDel != null) {
+    state.exhibits.splice(Number(t.dataset.exDel), 1);
+    render();
+  }
+});
+document.body.addEventListener("change", function (e) { onFormEvent(e); });
+document.body.addEventListener("input", function (e) {
+  const t = e.target;
+  if (t.type === "checkbox" || t.type === "radio" || t.tagName === "SELECT") return;
+  if (!t.dataset) return;
+  if (t.dataset.a || t.dataset.post || t.dataset.ex != null) onFormEvent(e);
+});
+document.body.addEventListener("change", function (e) {
+  if (e.target.id === "exhibitFile") onExhibitFiles(e.target);
+});
+
+window.__WB = {
+  TEMPLATE_VERSION: TEMPLATE_VERSION,
+  MAG_ROOM: MAG_ROOM,
+  dates: {
+    courtDaysAfter: courtDaysAfter,
+    businessDaysAfter: businessDaysAfter,
+    addCal: addCal,
+    executionDay: executionDay,
+    returnBy: returnBy,
+    longDate: longDate,
+    isHoliday: isHoliday
+  },
+  loadSample: loadSample,
+  go: function (stepId) {
+    const steps = stepsFor(state.type);
+    const i = steps.findIndex(function (s) { return s.id === stepId; });
+    if (i >= 0) state.step = i;
+    render();
+  },
+  setAnswer: function (k, v) { state.answers[k] = v; render(); },
+  setPost: function (k, v) { state.post[k] = v; render(); },
+  fingerprint: fingerprint,
+  plainText: function (id) {
+    const doc = documents().find(function (d) { return d.id === id; });
+    return doc ? plainText(doc) : "";
+  },
+  documents: function () { return documents().map(function (d) { return d.id; }); },
+  checklist: checklist,
+  nextAction: nextAction,
+  dateRows: dateRows,
+  gaps: gapsInPacket,
+  exportDocxB64: async function (id) {
+    const doc = documents().find(function (d) { return d.id === id; }) || documents()[0];
+    const blob = await exportDoc(doc);
+    return blobToB64(blob);
+  },
+  exportZipB64: async function () {
+    const zip = new JSZip();
+    const docs = documents();
+    for (const doc of docs) zip.file(doc.filename, await exportDoc(doc));
+    const blob = await zip.generateAsync({ type: "blob" });
+    return blobToB64(blob);
+  },
+  addExhibit: function (dataUrl, caption) {
+    state.exhibits.push({ name: "exhibit", caption: caption || "", dataUrl: dataUrl });
+    render();
+  },
+  setPingTemplate: function (b64) { pingTemplateB64 = b64 || ""; }
+};
+/* fillPingTemplate reads PING_TEMPLATE_B64 const. Tests of fallback use an invalid const path by calling export after a thrown load. */
+render();
+</script>
+</body>
+</html>
